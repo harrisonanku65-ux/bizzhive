@@ -8,10 +8,15 @@ export const ordersTable = pgTable("orders", {
   items: jsonb("items").notNull(),
   total: real("total").notNull(),
   currency: text("currency").notNull().default("GHS"),
-  status: text("status").notNull().default("completed"),
+  status: text("status").notNull().default("pending"),
+  paymentReference: text("payment_reference"),
+  paymentProvider: text("payment_provider"),
+  paymentMethod: text("payment_method"),
+  paymentStatus: text("payment_status").notNull().default("unpaid"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const insertOrderSchema = createInsertSchema(ordersTable).omit({ id: true, createdAt: true });
+export const insertOrderSchema = createInsertSchema(ordersTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof ordersTable.$inferSelect;

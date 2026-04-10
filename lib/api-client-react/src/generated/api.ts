@@ -31,17 +31,24 @@ import type {
   CreateVendorBody,
   DashboardStats,
   FeaturedContent,
+  FlutterwaveVerifyBody,
   HealthStatus,
   Lesson,
   ListCoursesParams,
   ListProductsParams,
   ListVendorsParams,
   Order,
+  PaymentInitializeBody,
+  PaymentInitializeResponse,
+  PaymentVerifyResponse,
+  PayoutResult,
   Product,
   Review,
   UpdateCourseBody,
   UpdateProductBody,
   Vendor,
+  VendorPayoutSettings,
+  VendorPayoutSettingsBody,
   VendorStats,
 } from "./api.schemas";
 
@@ -1989,6 +1996,602 @@ export const useCreateOrder = <
   TContext
 > => {
   return useMutation(getCreateOrderMutationOptions(options));
+};
+
+/**
+ * @summary Initialize a payment with Paystack or Flutterwave
+ */
+export const getInitializePaymentUrl = () => {
+  return `/api/payments/initialize`;
+};
+
+export const initializePayment = async (
+  paymentInitializeBody: PaymentInitializeBody,
+  options?: RequestInit,
+): Promise<PaymentInitializeResponse> => {
+  return customFetch<PaymentInitializeResponse>(getInitializePaymentUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(paymentInitializeBody),
+  });
+};
+
+export const getInitializePaymentMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof initializePayment>>,
+    TError,
+    { data: BodyType<PaymentInitializeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof initializePayment>>,
+  TError,
+  { data: BodyType<PaymentInitializeBody> },
+  TContext
+> => {
+  const mutationKey = ["initializePayment"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof initializePayment>>,
+    { data: BodyType<PaymentInitializeBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return initializePayment(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InitializePaymentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof initializePayment>>
+>;
+export type InitializePaymentMutationBody = BodyType<PaymentInitializeBody>;
+export type InitializePaymentMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Initialize a payment with Paystack or Flutterwave
+ */
+export const useInitializePayment = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof initializePayment>>,
+    TError,
+    { data: BodyType<PaymentInitializeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof initializePayment>>,
+  TError,
+  { data: BodyType<PaymentInitializeBody> },
+  TContext
+> => {
+  return useMutation(getInitializePaymentMutationOptions(options));
+};
+
+/**
+ * @summary Verify a Paystack payment by reference
+ */
+export const getVerifyPaymentUrl = (reference: string) => {
+  return `/api/payments/verify/${reference}`;
+};
+
+export const verifyPayment = async (
+  reference: string,
+  options?: RequestInit,
+): Promise<PaymentVerifyResponse> => {
+  return customFetch<PaymentVerifyResponse>(getVerifyPaymentUrl(reference), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getVerifyPaymentQueryKey = (reference: string) => {
+  return [`/api/payments/verify/${reference}`] as const;
+};
+
+export const getVerifyPaymentQueryOptions = <
+  TData = Awaited<ReturnType<typeof verifyPayment>>,
+  TError = ErrorType<unknown>,
+>(
+  reference: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof verifyPayment>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getVerifyPaymentQueryKey(reference);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof verifyPayment>>> = ({
+    signal,
+  }) => verifyPayment(reference, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!reference,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof verifyPayment>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type VerifyPaymentQueryResult = NonNullable<
+  Awaited<ReturnType<typeof verifyPayment>>
+>;
+export type VerifyPaymentQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Verify a Paystack payment by reference
+ */
+
+export function useVerifyPayment<
+  TData = Awaited<ReturnType<typeof verifyPayment>>,
+  TError = ErrorType<unknown>,
+>(
+  reference: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof verifyPayment>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getVerifyPaymentQueryOptions(reference, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Verify a Flutterwave payment by transaction id
+ */
+export const getVerifyFlutterwavePaymentUrl = () => {
+  return `/api/payments/flutterwave/verify`;
+};
+
+export const verifyFlutterwavePayment = async (
+  flutterwaveVerifyBody: FlutterwaveVerifyBody,
+  options?: RequestInit,
+): Promise<PaymentVerifyResponse> => {
+  return customFetch<PaymentVerifyResponse>(getVerifyFlutterwavePaymentUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(flutterwaveVerifyBody),
+  });
+};
+
+export const getVerifyFlutterwavePaymentMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof verifyFlutterwavePayment>>,
+    TError,
+    { data: BodyType<FlutterwaveVerifyBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof verifyFlutterwavePayment>>,
+  TError,
+  { data: BodyType<FlutterwaveVerifyBody> },
+  TContext
+> => {
+  const mutationKey = ["verifyFlutterwavePayment"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof verifyFlutterwavePayment>>,
+    { data: BodyType<FlutterwaveVerifyBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return verifyFlutterwavePayment(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type VerifyFlutterwavePaymentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof verifyFlutterwavePayment>>
+>;
+export type VerifyFlutterwavePaymentMutationBody =
+  BodyType<FlutterwaveVerifyBody>;
+export type VerifyFlutterwavePaymentMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Verify a Flutterwave payment by transaction id
+ */
+export const useVerifyFlutterwavePayment = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof verifyFlutterwavePayment>>,
+    TError,
+    { data: BodyType<FlutterwaveVerifyBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof verifyFlutterwavePayment>>,
+  TError,
+  { data: BodyType<FlutterwaveVerifyBody> },
+  TContext
+> => {
+  return useMutation(getVerifyFlutterwavePaymentMutationOptions(options));
+};
+
+/**
+ * @summary Paystack webhook handler
+ */
+export const getPaystackWebhookUrl = () => {
+  return `/api/payments/paystack/webhook`;
+};
+
+export const paystackWebhook = async (options?: RequestInit): Promise<void> => {
+  return customFetch<void>(getPaystackWebhookUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getPaystackWebhookMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof paystackWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof paystackWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["paystackWebhook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof paystackWebhook>>,
+    void
+  > = () => {
+    return paystackWebhook(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PaystackWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof paystackWebhook>>
+>;
+
+export type PaystackWebhookMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Paystack webhook handler
+ */
+export const usePaystackWebhook = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof paystackWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof paystackWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getPaystackWebhookMutationOptions(options));
+};
+
+/**
+ * @summary Flutterwave webhook handler
+ */
+export const getFlutterwaveWebhookUrl = () => {
+  return `/api/payments/flutterwave/webhook`;
+};
+
+export const flutterwaveWebhook = async (
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getFlutterwaveWebhookUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getFlutterwaveWebhookMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof flutterwaveWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof flutterwaveWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["flutterwaveWebhook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof flutterwaveWebhook>>,
+    void
+  > = () => {
+    return flutterwaveWebhook(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type FlutterwaveWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof flutterwaveWebhook>>
+>;
+
+export type FlutterwaveWebhookMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Flutterwave webhook handler
+ */
+export const useFlutterwaveWebhook = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof flutterwaveWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof flutterwaveWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getFlutterwaveWebhookMutationOptions(options));
+};
+
+/**
+ * @summary Update vendor payout settings (MoMo / bank)
+ */
+export const getUpdateVendorPayoutSettingsUrl = (vendorId: number) => {
+  return `/api/vendors/${vendorId}/payout-settings`;
+};
+
+export const updateVendorPayoutSettings = async (
+  vendorId: number,
+  vendorPayoutSettingsBody: VendorPayoutSettingsBody,
+  options?: RequestInit,
+): Promise<VendorPayoutSettings> => {
+  return customFetch<VendorPayoutSettings>(
+    getUpdateVendorPayoutSettingsUrl(vendorId),
+    {
+      ...options,
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(vendorPayoutSettingsBody),
+    },
+  );
+};
+
+export const getUpdateVendorPayoutSettingsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateVendorPayoutSettings>>,
+    TError,
+    { vendorId: number; data: BodyType<VendorPayoutSettingsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateVendorPayoutSettings>>,
+  TError,
+  { vendorId: number; data: BodyType<VendorPayoutSettingsBody> },
+  TContext
+> => {
+  const mutationKey = ["updateVendorPayoutSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateVendorPayoutSettings>>,
+    { vendorId: number; data: BodyType<VendorPayoutSettingsBody> }
+  > = (props) => {
+    const { vendorId, data } = props ?? {};
+
+    return updateVendorPayoutSettings(vendorId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateVendorPayoutSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateVendorPayoutSettings>>
+>;
+export type UpdateVendorPayoutSettingsMutationBody =
+  BodyType<VendorPayoutSettingsBody>;
+export type UpdateVendorPayoutSettingsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update vendor payout settings (MoMo / bank)
+ */
+export const useUpdateVendorPayoutSettings = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateVendorPayoutSettings>>,
+    TError,
+    { vendorId: number; data: BodyType<VendorPayoutSettingsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateVendorPayoutSettings>>,
+  TError,
+  { vendorId: number; data: BodyType<VendorPayoutSettingsBody> },
+  TContext
+> => {
+  return useMutation(getUpdateVendorPayoutSettingsMutationOptions(options));
+};
+
+/**
+ * @summary Process vendor payouts for a completed order
+ */
+export const getProcessOrderPayoutsUrl = (orderId: number) => {
+  return `/api/payouts/process/${orderId}`;
+};
+
+export const processOrderPayouts = async (
+  orderId: number,
+  options?: RequestInit,
+): Promise<PayoutResult> => {
+  return customFetch<PayoutResult>(getProcessOrderPayoutsUrl(orderId), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getProcessOrderPayoutsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof processOrderPayouts>>,
+    TError,
+    { orderId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof processOrderPayouts>>,
+  TError,
+  { orderId: number },
+  TContext
+> => {
+  const mutationKey = ["processOrderPayouts"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof processOrderPayouts>>,
+    { orderId: number }
+  > = (props) => {
+    const { orderId } = props ?? {};
+
+    return processOrderPayouts(orderId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ProcessOrderPayoutsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof processOrderPayouts>>
+>;
+
+export type ProcessOrderPayoutsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Process vendor payouts for a completed order
+ */
+export const useProcessOrderPayouts = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof processOrderPayouts>>,
+    TError,
+    { orderId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof processOrderPayouts>>,
+  TError,
+  { orderId: number },
+  TContext
+> => {
+  return useMutation(getProcessOrderPayoutsMutationOptions(options));
 };
 
 /**

@@ -6,6 +6,8 @@ import coursesRouter from "./courses";
 import productsRouter from "./products";
 import cartRouter from "./cart";
 import dashboardRouter from "./dashboard";
+import paymentsRouter from "./payments";
+import payoutsRouter from "./payouts";
 
 const router: IRouter = Router();
 
@@ -16,5 +18,7 @@ router.use(coursesRouter);
 router.use(productsRouter);
 router.use(cartRouter);
 router.use(dashboardRouter);
+router.use(paymentsRouter);
+router.use(payoutsRouter);
 
 export default router;

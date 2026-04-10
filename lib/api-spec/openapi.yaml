@@ -24,6 +24,10 @@ tags:
     description: Order operations
   - name: dashboard
     description: Dashboard and analytics
+  - name: payments
+    description: Payment processing (Paystack & Flutterwave)
+  - name: payouts
+    description: Vendor payout management
 
 paths:
   /healthz:
@@ -489,6 +493,125 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+
+  /payments/initialize:
+    post:
+      operationId: initializePayment
+      tags: [payments]
+      summary: Initialize a payment with Paystack or Flutterwave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInitializeBody"
+      responses:
+        "200":
+          description: Payment initialized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentInitializeResponse"
+
+  /payments/verify/{reference}:
+    get:
+      operationId: verifyPayment
+      tags: [payments]
+      summary: Verify a Paystack payment by reference
+      parameters:
+        - name: reference
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentVerifyResponse"
+
+  /payments/flutterwave/verify:
+    post:
+      operationId: verifyFlutterwavePayment
+      tags: [payments]
+      summary: Verify a Flutterwave payment by transaction id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlutterwaveVerifyBody"
+      responses:
+        "200":
+          description: Payment verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentVerifyResponse"
+
+  /payments/paystack/webhook:
+    post:
+      operationId: paystackWebhook
+      tags: [payments]
+      summary: Paystack webhook handler
+      responses:
+        "200":
+          description: Webhook processed
+
+  /payments/flutterwave/webhook:
+    post:
+      operationId: flutterwaveWebhook
+      tags: [payments]
+      summary: Flutterwave webhook handler
+      responses:
+        "200":
+          description: Webhook processed
+
+  /vendors/{vendorId}/payout-settings:
+    put:
+      operationId: updateVendorPayoutSettings
+      tags: [payouts]
+      summary: Update vendor payout settings (MoMo / bank)
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorPayoutSettingsBody"
+      responses:
+        "200":
+          description: Payout settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorPayoutSettings"
+
+  /payouts/process/{orderId}:
+    post:
+      operationId: processOrderPayouts
+      tags: [payouts]
+      summary: Process vendor payouts for a completed order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payout results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayoutResult"
 
   /dashboard/stats:
     get:
@@ -1129,3 +1252,120 @@ components:
         totalItems:
           type: integer
       required: [categoryId, categoryName, courseCount, productCount, totalItems]
+
+    PaymentInitializeBody:
+      type: object
+      properties:
+        provider:
+          type: string
+          enum: [paystack, flutterwave]
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        momoNetwork:
+          type: string
+          enum: [MTN, Vodafone, AirtelTigo]
+        paymentMethod:
+          type: string
+          enum: [card, mobile_money]
+      required: [provider, email]
+
+    PaymentInitializeResponse:
+      type: object
+      properties:
+        orderId:
+          type: integer
+        reference:
+          type: string
+        accessCode:
+          type: ["string", "null"]
+        paymentUrl:
+          type: ["string", "null"]
+        paystackPublicKey:
+          type: ["string", "null"]
+        flutterwavePublicKey:
+          type: ["string", "null"]
+        provider:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+      required: [orderId, reference, provider, amount, currency]
+
+    FlutterwaveVerifyBody:
+      type: object
+      properties:
+        transactionId:
+          type: string
+        reference:
+          type: string
+      required: [transactionId, reference]
+
+    PaymentVerifyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, failed, pending]
+        orderId:
+          type: integer
+        reference:
+          type: string
+        message:
+          type: string
+        payoutScheduled:
+          type: boolean
+      required: [status, reference, message]
+
+    VendorPayoutSettingsBody:
+      type: object
+      properties:
+        momoNumber:
+          type: string
+        momoNetwork:
+          type: string
+          enum: [MTN, Vodafone, AirtelTigo]
+        email:
+          type: string
+      required: [momoNumber, momoNetwork]
+
+    VendorPayoutSettings:
+      type: object
+      properties:
+        vendorId:
+          type: integer
+        momoNumber:
+          type: ["string", "null"]
+        momoNetwork:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        payoutPercentage:
+          type: number
+      required: [vendorId, payoutPercentage]
+
+    PayoutResult:
+      type: object
+      properties:
+        orderId:
+          type: integer
+        payouts:
+          type: array
+          items:
+            type: object
+            properties:
+              vendorId:
+                type: integer
+              vendorName:
+                type: string
+              amount:
+                type: number
+              status:
+                type: string
+              reference:
+                type: string
+            required: [vendorId, vendorName, amount, status]
+      required: [orderId, payouts]

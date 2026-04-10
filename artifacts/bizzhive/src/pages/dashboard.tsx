@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetDashboardStats, useGetRecentActivity, useGetCategoryBreakdown, useListCourses, useListProducts, useCreateCourse, useCreateProduct, useCreateLesson, getListCoursesQueryKey, getListProductsQueryKey, useListCategories } from "@workspace/api-client-react";
+import { useGetDashboardStats, useGetRecentActivity, useGetCategoryBreakdown, useListCourses, useListProducts, useCreateCourse, useCreateProduct, useCreateLesson, getListCoursesQueryKey, getListProductsQueryKey, useListCategories, useUpdateVendorPayoutSettings } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, ShoppingBag, Users, DollarSign, TrendingUp, Plus, BarChart3 } from "lucide-react";
+import { BookOpen, ShoppingBag, Users, DollarSign, TrendingUp, Plus, CheckCircle, Smartphone } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
@@ -21,12 +21,15 @@ export default function Dashboard() {
   const createCourse = useCreateCourse();
   const createProduct = useCreateProduct();
   const createLesson = useCreateLesson();
+  const updatePayoutSettings = useUpdateVendorPayoutSettings();
   const queryClient = useQueryClient();
 
   const [courseForm, setCourseForm] = useState({ title: "", description: "", price: "", level: "beginner", categoryId: "", duration: "" });
   const [productForm, setProductForm] = useState({ title: "", description: "", price: "", productType: "ebook", categoryId: "" });
   const [courseDialogOpen, setCourseDialogOpen] = useState(false);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [payoutForm, setPayoutForm] = useState({ momoNumber: "", momoNetwork: "MTN" as "MTN" | "Vodafone" | "AirtelTigo", email: "" });
+  const [payoutSaved, setPayoutSaved] = useState(false);
 
   const handleCreateCourse = () => {
     if (!courseForm.title || !courseForm.price || !courseForm.categoryId) return;

@@ -13,6 +13,11 @@ export const vendorsTable = pgTable("vendors", {
   totalSales: integer("total_sales").notNull().default(0),
   featured: boolean("featured").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  email: text("email"),
+  momoNumber: text("momo_number"),
+  momoNetwork: text("momo_network"),
+  paystackRecipientCode: text("paystack_recipient_code"),
+  payoutPercentage: real("payout_percentage").notNull().default(80),
 });
 
 export const insertVendorSchema = createInsertSchema(vendorsTable).omit({ id: true, createdAt: true, rating: true, totalSales: true });

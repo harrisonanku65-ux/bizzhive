@@ -398,6 +398,116 @@ export interface CategoryBreakdown {
   totalItems: number;
 }
 
+export type PaymentInitializeBodyProvider =
+  (typeof PaymentInitializeBodyProvider)[keyof typeof PaymentInitializeBodyProvider];
+
+export const PaymentInitializeBodyProvider = {
+  paystack: "paystack",
+  flutterwave: "flutterwave",
+} as const;
+
+export type PaymentInitializeBodyMomoNetwork =
+  (typeof PaymentInitializeBodyMomoNetwork)[keyof typeof PaymentInitializeBodyMomoNetwork];
+
+export const PaymentInitializeBodyMomoNetwork = {
+  MTN: "MTN",
+  Vodafone: "Vodafone",
+  AirtelTigo: "AirtelTigo",
+} as const;
+
+export type PaymentInitializeBodyPaymentMethod =
+  (typeof PaymentInitializeBodyPaymentMethod)[keyof typeof PaymentInitializeBodyPaymentMethod];
+
+export const PaymentInitializeBodyPaymentMethod = {
+  card: "card",
+  mobile_money: "mobile_money",
+} as const;
+
+export interface PaymentInitializeBody {
+  provider: PaymentInitializeBodyProvider;
+  email: string;
+  phone?: string;
+  momoNetwork?: PaymentInitializeBodyMomoNetwork;
+  paymentMethod?: PaymentInitializeBodyPaymentMethod;
+}
+
+export interface PaymentInitializeResponse {
+  orderId: number;
+  reference: string;
+  /** @nullable */
+  accessCode?: string | null;
+  /** @nullable */
+  paymentUrl?: string | null;
+  /** @nullable */
+  paystackPublicKey?: string | null;
+  /** @nullable */
+  flutterwavePublicKey?: string | null;
+  provider: string;
+  amount: number;
+  currency: string;
+}
+
+export interface FlutterwaveVerifyBody {
+  transactionId: string;
+  reference: string;
+}
+
+export type PaymentVerifyResponseStatus =
+  (typeof PaymentVerifyResponseStatus)[keyof typeof PaymentVerifyResponseStatus];
+
+export const PaymentVerifyResponseStatus = {
+  success: "success",
+  failed: "failed",
+  pending: "pending",
+} as const;
+
+export interface PaymentVerifyResponse {
+  status: PaymentVerifyResponseStatus;
+  orderId?: number;
+  reference: string;
+  message: string;
+  payoutScheduled?: boolean;
+}
+
+export type VendorPayoutSettingsBodyMomoNetwork =
+  (typeof VendorPayoutSettingsBodyMomoNetwork)[keyof typeof VendorPayoutSettingsBodyMomoNetwork];
+
+export const VendorPayoutSettingsBodyMomoNetwork = {
+  MTN: "MTN",
+  Vodafone: "Vodafone",
+  AirtelTigo: "AirtelTigo",
+} as const;
+
+export interface VendorPayoutSettingsBody {
+  momoNumber: string;
+  momoNetwork: VendorPayoutSettingsBodyMomoNetwork;
+  email?: string;
+}
+
+export interface VendorPayoutSettings {
+  vendorId: number;
+  /** @nullable */
+  momoNumber?: string | null;
+  /** @nullable */
+  momoNetwork?: string | null;
+  /** @nullable */
+  email?: string | null;
+  payoutPercentage: number;
+}
+
+export type PayoutResultPayoutsItem = {
+  vendorId: number;
+  vendorName: string;
+  amount: number;
+  status: string;
+  reference?: string;
+};
+
+export interface PayoutResult {
+  orderId: number;
+  payouts: PayoutResultPayoutsItem[];
+}
+
 export type ListVendorsParams = {
   featured?: boolean;
 };

@@ -513,6 +513,101 @@ export const ListOrdersResponseItem = zod.object({
 export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
 
 /**
+ * @summary Initialize a payment with Paystack or Flutterwave
+ */
+export const InitializePaymentBody = zod.object({
+  provider: zod.enum(["paystack", "flutterwave"]),
+  email: zod.string().email(),
+  phone: zod.string().optional(),
+  momoNetwork: zod.enum(["MTN", "Vodafone", "AirtelTigo"]).optional(),
+  paymentMethod: zod.enum(["card", "mobile_money"]).optional(),
+});
+
+export const InitializePaymentResponse = zod.object({
+  orderId: zod.number(),
+  reference: zod.string(),
+  accessCode: zod.string().nullish(),
+  paymentUrl: zod.string().nullish(),
+  paystackPublicKey: zod.string().nullish(),
+  flutterwavePublicKey: zod.string().nullish(),
+  provider: zod.string(),
+  amount: zod.number(),
+  currency: zod.string(),
+});
+
+/**
+ * @summary Verify a Paystack payment by reference
+ */
+export const VerifyPaymentParams = zod.object({
+  reference: zod.coerce.string(),
+});
+
+export const VerifyPaymentResponse = zod.object({
+  status: zod.enum(["success", "failed", "pending"]),
+  orderId: zod.number().optional(),
+  reference: zod.string(),
+  message: zod.string(),
+  payoutScheduled: zod.boolean().optional(),
+});
+
+/**
+ * @summary Verify a Flutterwave payment by transaction id
+ */
+export const VerifyFlutterwavePaymentBody = zod.object({
+  transactionId: zod.string(),
+  reference: zod.string(),
+});
+
+export const VerifyFlutterwavePaymentResponse = zod.object({
+  status: zod.enum(["success", "failed", "pending"]),
+  orderId: zod.number().optional(),
+  reference: zod.string(),
+  message: zod.string(),
+  payoutScheduled: zod.boolean().optional(),
+});
+
+/**
+ * @summary Update vendor payout settings (MoMo / bank)
+ */
+export const UpdateVendorPayoutSettingsParams = zod.object({
+  vendorId: zod.coerce.number(),
+});
+
+export const UpdateVendorPayoutSettingsBody = zod.object({
+  momoNumber: zod.string(),
+  momoNetwork: zod.enum(["MTN", "Vodafone", "AirtelTigo"]),
+  email: zod.string().optional(),
+});
+
+export const UpdateVendorPayoutSettingsResponse = zod.object({
+  vendorId: zod.number(),
+  momoNumber: zod.string().nullish(),
+  momoNetwork: zod.string().nullish(),
+  email: zod.string().nullish(),
+  payoutPercentage: zod.number(),
+});
+
+/**
+ * @summary Process vendor payouts for a completed order
+ */
+export const ProcessOrderPayoutsParams = zod.object({
+  orderId: zod.coerce.number(),
+});
+
+export const ProcessOrderPayoutsResponse = zod.object({
+  orderId: zod.number(),
+  payouts: zod.array(
+    zod.object({
+      vendorId: zod.number(),
+      vendorName: zod.string(),
+      amount: zod.number(),
+      status: zod.string(),
+      reference: zod.string().optional(),
+    }),
+  ),
+});
+
+/**
  * @summary Get marketplace overview stats
  */
 export const GetDashboardStatsResponse = zod.object({

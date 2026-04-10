@@ -14,6 +14,7 @@ import VendorDetail from "@/pages/vendor-detail";
 import Cart from "@/pages/cart";
 import Orders from "@/pages/orders";
 import Dashboard from "@/pages/dashboard";
+import PaymentSuccess from "@/pages/payment-success";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/cart" component={Cart} />
         <Route path="/orders" component={Orders} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/payment-success" component={PaymentSuccess} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
