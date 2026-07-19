@@ -8,10 +8,12 @@ import cartRouter from "./cart";
 import dashboardRouter from "./dashboard";
 import paymentsRouter from "./payments";
 import payoutsRouter from "./payouts";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(authRouter);
 router.use(categoriesRouter);
 router.use(vendorsRouter);
 router.use(coursesRouter);

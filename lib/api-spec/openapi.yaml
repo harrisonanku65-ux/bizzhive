@@ -28,8 +28,78 @@ tags:
     description: Payment processing (Paystack & Flutterwave)
   - name: payouts
     description: Vendor payout management
+  - name: auth
+    description: Buyer and seller authentication
 
 paths:
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new buyer or seller account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Validation error
+        "409":
+          description: Email already exists
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+
   /healthz:
     get:
       operationId: healthCheck
@@ -705,6 +775,69 @@ paths:
 
 components:
   schemas:
+    RegisterBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        firstName:
+          type: string
+        lastName:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [buyer, seller]
+          default: buyer
+        phone:
+          type: string
+        vendorName:
+          type: string
+        vendorBio:
+          type: string
+        vendorLocation:
+          type: string
+      required: [email, password, firstName, lastName, role]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        displayName:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [buyer, seller, admin]
+        vendorId:
+          type: ["integer", "null"]
+        avatar:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+      required: [id, email, role]
+
     HealthStatus:
       type: object
       properties:

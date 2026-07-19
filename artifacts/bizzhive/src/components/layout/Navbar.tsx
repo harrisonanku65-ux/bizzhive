@@ -1,12 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ShoppingCart, Menu, Search, User, LogIn, LogOut, LayoutDashboard, Package, ChevronDown, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useGetCart } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -14,8 +10,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export function Navbar() {
   const [location] = useLocation();
   const { data: cart } = useGetCart();
+  const { user, isAuthenticated, isSeller, logout } = useAuth();
 
   const cartItemCount = cart?.itemCount || 0;
+  const displayName = user?.displayName ?? user?.firstName ?? user?.email?.split("@")[0] ?? "User";
+  const userInitial = displayName.charAt(0).toUpperCase();
 
   const NavLinks = () => (
     <>
@@ -48,31 +47,41 @@ export function Navbar() {
                 <Link href="/courses" className="text-lg font-medium">Courses</Link>
                 <Link href="/products" className="text-lg font-medium">Digital Products</Link>
                 <Link href="/vendors" className="text-lg font-medium">Creators</Link>
-                <Link href="/dashboard" className="text-lg font-medium">Dashboard</Link>
+                {isSeller && <Link href="/dashboard" className="text-lg font-medium">Dashboard</Link>}
+                {!isAuthenticated && (
+                  <>
+                    <Link href="/login" className="text-lg font-medium">Sign In</Link>
+                    <Link href="/signup" className="text-lg font-medium">Create Account</Link>
+                  </>
+                )}
+                {isAuthenticated && (
+                  <Link href="/orders" className="text-lg font-medium">My Orders</Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
-          
+
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-primary text-primary-foreground p-1 rounded-md">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
             </div>
             <span className="font-display font-bold text-xl tracking-tight">BizzHive</span>
           </Link>
-          
+
           <nav className="hidden md:flex items-center gap-6 ml-6">
             <NavLinks />
+            {isSeller && (
+              <Link href="/dashboard" className={`text-sm font-medium transition-colors hover:text-primary ${location.startsWith('/dashboard') ? 'text-primary' : 'text-foreground/80'}`}>
+                Dashboard
+              </Link>
+            )}
           </nav>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="relative hidden sm:block w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search Makola market..."
-              className="w-full bg-muted rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
+            <input type="search" placeholder="Search Makola market..." className="w-full bg-muted rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
           </div>
 
           <Link href="/cart">
@@ -87,35 +96,60 @@ export function Navbar() {
             </Button>
           </Link>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-                  <User className="h-4 w-4" />
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2 px-2.5">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {userInitial}
+                  </div>
+                  <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
+                  <ChevronDown className="h-3 w-3 text-muted-foreground hidden sm:inline" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center justify-start gap-2 p-2 border-b border-border/40 mb-1">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {userInitial}
+                  </div>
+                  <div className="flex flex-col leading-none">
+                    <p className="font-medium text-sm">{displayName}</p>
+                    <p className="text-xs text-muted-foreground truncate w-[180px]">{user?.email}</p>
+                    {isSeller && (
+                      <span className="text-[10px] mt-0.5 font-medium text-secondary bg-secondary/10 px-1.5 py-0.5 rounded-full self-start">
+                        Seller
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className="sr-only">User menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium text-sm">Kwame Osei</p>
-                  <p className="w-[200px] truncate text-xs text-muted-foreground">
-                    kwame@bizzhive.gh
-                  </p>
-                </div>
-              </div>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="w-full cursor-pointer">Dashboard</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/orders" className="w-full cursor-pointer">My Orders</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem asChild>
+                  <Link href="/orders" className="w-full cursor-pointer flex items-center gap-2"><Package className="h-4 w-4" /> My Orders</Link>
+                </DropdownMenuItem>
+                {isSeller && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="w-full cursor-pointer flex items-center gap-2"><LayoutDashboard className="h-4 w-4" /> Dashboard</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={logout} className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer flex items-center gap-2">
+                  <LogOut className="h-4 w-4" /> Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="ghost" size="sm" className="hidden sm:flex rounded-full">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm" className="rounded-full">
+                  <LogIn className="h-4 w-4 mr-1.5" />
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

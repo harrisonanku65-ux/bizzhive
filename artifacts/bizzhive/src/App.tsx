@@ -2,6 +2,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Layout } from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -14,6 +15,8 @@ import VendorDetail from "@/pages/vendor-detail";
 import Cart from "@/pages/cart";
 import Orders from "@/pages/orders";
 import Dashboard from "@/pages/dashboard";
+import Login from "@/pages/login";
+import Signup from "@/pages/signup";
 import PaymentSuccess from "@/pages/payment-success";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,8 @@ function Router() {
         <Route path="/cart" component={Cart} />
         <Route path="/orders" component={Orders} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/login" component={Login} />
+        <Route path="/signup" component={Signup} />
         <Route path="/payment-success" component={PaymentSuccess} />
         <Route component={NotFound} />
       </Switch>
@@ -42,12 +47,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

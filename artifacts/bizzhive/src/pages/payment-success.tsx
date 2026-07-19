@@ -7,9 +7,7 @@ export default function PaymentSuccess() {
   const params = new URLSearchParams(window.location.search);
   const reference = params.get("reference") || params.get("trxref") || "";
 
-  const { data, isLoading, isError } = useVerifyPayment(reference, {
-    query: { enabled: !!reference, retry: 2 }
-  });
+  const { data, isLoading, isError } = useVerifyPayment(reference);
 
   const status = !reference ? "success" : isLoading ? "loading" : isError ? "failed" : data?.status === "success" ? "success" : "failed";
 

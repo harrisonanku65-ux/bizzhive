@@ -13,8 +13,8 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const courseId = parseInt(id || "0");
-  const { data: course, isLoading } = useGetCourse(courseId, { query: { enabled: !!courseId } });
-  const { data: reviews } = useListCourseReviews(courseId, { query: { enabled: !!courseId } });
+  const { data: course, isLoading } = useGetCourse(courseId);
+  const { data: reviews } = useListCourseReviews(courseId);
   const addToCart = useAddToCart();
   const createReview = useCreateCourseReview();
   const queryClient = useQueryClient();

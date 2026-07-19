@@ -2,12 +2,29 @@ import { useListOrders } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingBag, Package } from "lucide-react";
+import { ShoppingBag, Package, LogIn } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Orders() {
+  const { user, isLoading: authLoading } = useAuth();
   const { data: orders, isLoading } = useListOrders();
+
+  if (authLoading) {
+    return <div className="container mx-auto px-4 py-8"><Skeleton className="h-64" /></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <LogIn className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <h1 className="text-2xl font-display font-bold mb-2">Sign In Required</h1>
+        <p className="text-muted-foreground mb-6">Please sign in to view your orders.</p>
+        <Link href="/login"><Button>Sign In</Button></Link>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><Skeleton className="h-64" /></div>;

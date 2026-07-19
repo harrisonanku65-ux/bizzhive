@@ -8,6 +8,61 @@
 import * as zod from "zod";
 
 /**
+ * @summary Register a new buyer or seller account
+ */
+export const registerBodyPasswordMin = 6;
+
+export const registerBodyRoleDefault = `buyer`;
+
+export const RegisterBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string().min(registerBodyPasswordMin),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  displayName: zod.string().optional(),
+  role: zod.enum(["buyer", "seller"]).default(registerBodyRoleDefault),
+  phone: zod.string().optional(),
+  vendorName: zod.string().optional(),
+  vendorBio: zod.string().optional(),
+  vendorLocation: zod.string().optional(),
+});
+
+/**
+ * @summary Login with email and password
+ */
+export const LoginBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string(),
+});
+
+export const LoginResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  firstName: zod.string().nullish(),
+  lastName: zod.string().nullish(),
+  displayName: zod.string().nullish(),
+  role: zod.enum(["buyer", "seller", "admin"]),
+  vendorId: zod.number().nullish(),
+  avatar: zod.string().nullish(),
+  phone: zod.string().nullish(),
+});
+
+/**
+ * @summary Get current authenticated user
+ */
+export const GetMeResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  firstName: zod.string().nullish(),
+  lastName: zod.string().nullish(),
+  displayName: zod.string().nullish(),
+  role: zod.enum(["buyer", "seller", "admin"]),
+  vendorId: zod.number().nullish(),
+  avatar: zod.string().nullish(),
+  phone: zod.string().nullish(),
+});
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

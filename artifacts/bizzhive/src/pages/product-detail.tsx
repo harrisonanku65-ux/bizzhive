@@ -12,7 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const productId = parseInt(id || "0");
-  const { data: product, isLoading } = useGetProduct(productId, { query: { enabled: !!productId } });
+  const { data: product, isLoading } = useGetProduct(productId);
   const addToCart = useAddToCart();
   const queryClient = useQueryClient();
 

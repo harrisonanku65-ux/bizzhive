@@ -11,10 +11,10 @@ import { Star, MapPin, BookOpen, ShoppingBag, Users } from "lucide-react";
 export default function VendorDetail() {
   const { id } = useParams<{ id: string }>();
   const vendorId = parseInt(id || "0");
-  const { data: vendor, isLoading } = useGetVendor(vendorId, { query: { enabled: !!vendorId } });
-  const { data: courses } = useListCourses({ vendorId }, { query: { enabled: !!vendorId } });
-  const { data: products } = useListProducts({ vendorId }, { query: { enabled: !!vendorId } });
-  const { data: stats } = useGetVendorStats(vendorId, { query: { enabled: !!vendorId } });
+  const { data: vendor, isLoading } = useGetVendor(vendorId);
+  const { data: courses } = useListCourses({ vendorId });
+  const { data: products } = useListProducts({ vendorId });
+  const { data: stats } = useGetVendorStats(vendorId);
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><Skeleton className="h-64" /></div>;

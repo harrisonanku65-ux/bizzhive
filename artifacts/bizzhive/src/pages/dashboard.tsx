@@ -8,15 +8,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, ShoppingBag, Users, DollarSign, TrendingUp, Plus, CheckCircle, Smartphone } from "lucide-react";
+import { BookOpen, ShoppingBag, Users, DollarSign, TrendingUp, Plus, CheckCircle, Smartphone, LogIn } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "wouter";
 
 export default function Dashboard() {
+  const { user, isLoading: authLoading } = useAuth();
+  const vendorId = user?.vendorId ?? null;
+
   const { data: stats, isLoading } = useGetDashboardStats();
   const { data: activity } = useGetRecentActivity();
   const { data: breakdown } = useGetCategoryBreakdown();
-  const { data: allCourses } = useListCourses({ vendorId: 1 });
-  const { data: allProducts } = useListProducts({ vendorId: 1 });
+  const { data: allCourses } = useListCourses(vendorId ? { vendorId } : undefined);
+  const { data: allProducts } = useListProducts(vendorId ? { vendorId } : undefined);
   const { data: categories } = useListCategories();
   const createCourse = useCreateCourse();
   const createProduct = useCreateProduct();
@@ -32,14 +37,14 @@ export default function Dashboard() {
   const [payoutSaved, setPayoutSaved] = useState(false);
 
   const handleCreateCourse = () => {
-    if (!courseForm.title || !courseForm.price || !courseForm.categoryId) return;
+    if (!courseForm.title || !courseForm.price || !courseForm.categoryId || !vendorId) return;
     createCourse.mutate({ data: {
       title: courseForm.title,
       description: courseForm.description,
       price: parseFloat(courseForm.price),
       level: courseForm.level as any,
       categoryId: parseInt(courseForm.categoryId),
-      vendorId: 1,
+      vendorId,
       duration: courseForm.duration,
     }}, {
       onSuccess: () => {
@@ -51,14 +56,14 @@ export default function Dashboard() {
   };
 
   const handleCreateProduct = () => {
-    if (!productForm.title || !productForm.price || !productForm.categoryId) return;
+    if (!productForm.title || !productForm.price || !productForm.categoryId || !vendorId) return;
     createProduct.mutate({ data: {
       title: productForm.title,
       description: productForm.description,
       price: parseFloat(productForm.price),
       productType: productForm.productType as any,
       categoryId: parseInt(productForm.categoryId),
-      vendorId: 1,
+      vendorId,
     }}, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
@@ -68,8 +73,30 @@ export default function Dashboard() {
     });
   };
 
-  if (isLoading) {
+  if (authLoading) {
     return <div className="container mx-auto px-4 py-8"><Skeleton className="h-64" /></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <LogIn className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <h1 className="text-2xl font-display font-bold mb-2">Sign In Required</h1>
+        <p className="text-muted-foreground mb-6">Please sign in to access your seller dashboard.</p>
+        <Link href="/login"><Button>Sign In</Button></Link>
+      </div>
+    );
+  }
+
+  if (!vendorId) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <ShoppingBag className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <h1 className="text-2xl font-display font-bold mb-2">Seller Account Required</h1>
+        <p className="text-muted-foreground mb-6">You need a seller account to access the dashboard. Upgrade your account to start selling.</p>
+        <Link href="/signup?role=seller"><Button>Become a Seller</Button></Link>
+      </div>
+    );
   }
 
   return (
@@ -203,6 +230,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ))}
+            {!allCourses?.length && <p className="text-muted-foreground text-sm text-center py-8">No courses yet. Create your first course above.</p>}
           </div>
         </TabsContent>
 
@@ -262,6 +290,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ))}
+            {!allProducts?.length && <p className="text-muted-foreground text-sm text-center py-8">No products yet. Create your first product above.</p>}
           </div>
         </TabsContent>
 

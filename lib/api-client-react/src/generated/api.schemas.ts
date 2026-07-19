@@ -5,6 +5,59 @@
  * BizzHive Marketplace API
  * OpenAPI spec version: 0.1.0
  */
+export type RegisterBodyRole =
+  (typeof RegisterBodyRole)[keyof typeof RegisterBodyRole];
+
+export const RegisterBodyRole = {
+  buyer: "buyer",
+  seller: "seller",
+} as const;
+
+export interface RegisterBody {
+  email: string;
+  /** @minLength 6 */
+  password: string;
+  firstName: string;
+  lastName: string;
+  displayName?: string;
+  role: RegisterBodyRole;
+  phone?: string;
+  vendorName?: string;
+  vendorBio?: string;
+  vendorLocation?: string;
+}
+
+export interface LoginBody {
+  email: string;
+  password: string;
+}
+
+export type AuthUserRole = (typeof AuthUserRole)[keyof typeof AuthUserRole];
+
+export const AuthUserRole = {
+  buyer: "buyer",
+  seller: "seller",
+  admin: "admin",
+} as const;
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  /** @nullable */
+  firstName?: string | null;
+  /** @nullable */
+  lastName?: string | null;
+  /** @nullable */
+  displayName?: string | null;
+  role: AuthUserRole;
+  /** @nullable */
+  vendorId?: number | null;
+  /** @nullable */
+  avatar?: string | null;
+  /** @nullable */
+  phone?: string | null;
+}
+
 export interface HealthStatus {
   status: string;
 }
