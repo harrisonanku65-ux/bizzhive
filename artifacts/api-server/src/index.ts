@@ -1,7 +1,11 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 
-const rawPort = process.env["PORT"];
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
+
+const rawPort =
+  process.env["PORT"] ||
+  (process.env.NODE_ENV === "development" ? "3000" : undefined);
 
 if (!rawPort) {
   throw new Error(

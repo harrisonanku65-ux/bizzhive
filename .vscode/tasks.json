@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start PostgreSQL",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Install dependencies",
+      "type": "shell",
+      "command": "pnpm install",
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Push DB schema",
+      "type": "shell",
+      "command": "pnpm run db:push",
+      "group": "build",
+      "dependsOn": ["Start PostgreSQL"],
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}

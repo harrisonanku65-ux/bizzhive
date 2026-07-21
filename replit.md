@@ -58,4 +58,17 @@ BizzHive is a multi-vendor marketplace for Ghana where creators can sell online 
 
 All prices are in GHS (Ghana Cedis). The currency symbol is GHS or ₵.
 
+## Windows / Visual Studio Code setup
+
+The project now runs on Windows with VS Code.
+
+1. Install prerequisites: Node.js 22+, pnpm 9+, Git, and Docker Desktop (for PostgreSQL).
+2. Copy `env.example` to a `.env` file in the repo root and adjust any values.
+3. Start Postgres: `docker compose up -d`
+4. Install dependencies: `pnpm install`
+5. Push the database schema: `pnpm --filter @workspace/db run push` (with `DATABASE_URL` exported, or use the VS Code task).
+6. Open VS Code and press `F5` (or run the **Run BizzHive** compound launch configuration). This starts the API server and the web frontend together.
+
+See `WINDOWS_SETUP.md` for a detailed walkthrough, including setting environment variables on Windows without a shell.
+
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
