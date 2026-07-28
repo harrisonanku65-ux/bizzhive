@@ -18,7 +18,9 @@ export const vendorsTable = pgTable("vendors", {
   momoNumber: text("momo_number"),
   momoNetwork: text("momo_network"),
   paystackRecipientCode: text("paystack_recipient_code"),
-  payoutPercentage: real("payout_percentage").notNull().default(80),
+  // Payout rate is derived from `plan` (see payoutPercentageForPlan in the
+  // api-server) rather than stored here, so it can never drift out of sync
+  // with what a vendor's plan actually pays.
   plan: text("plan").notNull().default("free"), // 'free' | 'pro' | 'premium'
   planExpiresAt: timestamp("plan_expires_at"),
   verifiedSeller: boolean("verified_seller").notNull().default(false),

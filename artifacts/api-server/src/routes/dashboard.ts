@@ -11,6 +11,7 @@ import {
   GetCategoryBreakdownResponse,
 } from "@workspace/api-zod";
 import { requireOwnVendorId } from "../middlewares/requireVendor";
+import { payoutPercentageForPlan } from "../lib/commission";
 
 const router: IRouter = Router();
 
@@ -386,7 +387,7 @@ router.get("/dashboard/vendor/:vendorId/analytics", async (req, res): Promise<vo
     repeatBuyerRate: buyers > 0 ? Math.round(((repeat.repeat_buyers ?? 0) / buyers) * 1000) / 10 : 0,
     averageOrderValue: orderCount > 0 ? Math.round((revenue / orderCount) * 100) / 100 : 0,
     fundsHeldInEscrow: Math.round((escrowResult.rows?.[0]?.held ?? 0) * 100) / 100,
-    payoutPercentage: vendor.payoutPercentage,
+    payoutPercentage: payoutPercentageForPlan(vendor.plan),
   };
 
   res.json(payload);

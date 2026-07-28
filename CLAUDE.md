@@ -82,7 +82,7 @@ Backs the Coaching, Consultation Calls, and Gaming Coaching categories. Vendors 
 
 ### Plan gating
 
-Vendor plans (Free/Pro/Premium) gate: active listing count, search placement, analytics depth, verified badge/homepage feature, and support priority. See `replit.md` for the current feature matrix — check plan-gating logic in `routes/dashboard.ts` / `routes/vendors.ts` before assuming a feature is available to all tiers.
+Vendor plans (Free/Pro/Premium) gate: active listing count, payout rate/platform commission, search placement, analytics depth, verified badge/homepage feature, and support priority. Payout rate is computed from `plan` via `payoutPercentageForPlan()` (`artifacts/api-server/src/lib/commission.ts`), not stored on the vendor — change rates there, not in the database. See `replit.md` for the current feature matrix — check plan-gating logic in `routes/dashboard.ts` / `routes/payouts.ts` before assuming a feature is available to all tiers.
 
 ### Design system — "Ink & Gold"
 

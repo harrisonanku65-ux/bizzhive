@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, vendorsTable, ordersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireOwnVendorId } from "../middlewares/requireVendor";
+import { payoutPercentageForPlan } from "../lib/commission";
 
 const router: IRouter = Router();
 
@@ -111,7 +112,7 @@ router.put("/vendors/:vendorId/payout-settings", async (req, res): Promise<void>
     momoNumber,
     momoNetwork,
     email: email ?? vendor.email,
-    payoutPercentage: vendor.payoutPercentage,
+    payoutPercentage: payoutPercentageForPlan(vendor.plan),
     paystackRecipientCode: recipientCode,
   });
 });
@@ -216,7 +217,7 @@ export async function processPayoutForOrder(orderId: number, payoutRatio = 1) {
     const [vendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, vendorId));
     if (!vendor) continue;
 
-    const payoutPct = vendor.payoutPercentage ?? 80;
+    const payoutPct = payoutPercentageForPlan(vendor.plan);
     const payoutAmount = Math.round(grossAmount * (payoutPct / 100) * 100) / 100;
 
     if (!PAYSTACK_SECRET_KEY || !vendor.momoNumber) {

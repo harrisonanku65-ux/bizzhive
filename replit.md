@@ -87,14 +87,17 @@ Backs the Coaching, Consultation Calls and Gaming Coaching categories. Vendors p
 | Feature | Free | Pro | Premium |
 |---|---|---|---|
 | Active listings (courses + products + slots) | 1 | 10 | Unlimited |
+| Payout rate (platform commission) | 80% (20%) | 85% (15%) | 90% (10%) |
 | Search placement | standard | boosted | top |
 | Analytics | lifetime totals only | + revenue trend, top listings | + repeat-buyer rate, AOV, escrow position |
 | Verified badge / homepage feature | — | — | yes |
 | Support priority | normal | standard | priority |
 
+Payout rate is computed from `plan` via `payoutPercentageForPlan()` (`artifacts/api-server/src/lib/commission.ts`) at the moment of each payout — it isn't stored per-vendor, so it can never drift out of sync with a vendor's actual plan. Change the rates in that one function.
+
 ### Database Schema (lib/db)
 - **categories**: name, slug, description, icon
-- **vendors**: name, slug, bio, avatar, location, rating, totalSales, featured, plan, planExpiresAt, verifiedSeller, momo/payout fields
+- **vendors**: name, slug, bio, avatar, location, rating, totalSales, featured, plan, planExpiresAt, verifiedSeller, momo fields (payout rate is derived from `plan`, not stored)
 - **courses**: title, slug, description, thumbnail, price, currency, level, duration, featured, published, vendorId, categoryId
 - **lessons**: title, description, duration, sortOrder, isFree, courseId
 - **products**: title, slug, description, thumbnail, price, currency, productType, fileUrl, previewUrl, licenseTerms, featured, published, vendorId, categoryId
