@@ -19,12 +19,10 @@ interface Bucket {
   blockedUntil?: number;
 }
 
-const buckets = new Map<string, Bucket>();
-
-// Bound the map so a flood of unique IPs can't grow it without limit.
+// Bound each limiter's map so a flood of unique IPs can't grow it without limit.
 const MAX_TRACKED_KEYS = 10_000;
 
-function sweep(now: number) {
+function sweep(buckets: Map<string, Bucket>, now: number) {
   if (buckets.size < MAX_TRACKED_KEYS) return;
   for (const [key, bucket] of buckets) {
     if (bucket.resetAt < now && (bucket.blockedUntil ?? 0) < now) {
@@ -62,9 +60,13 @@ export function rateLimit(options: RateLimitOptions) {
     message = "Too many attempts. Please wait a moment and try again.",
   } = options;
 
+  // Each limiter gets its own bucket store, so e.g. logging in twice doesn't
+  // eat into the separate budget for submitting support tickets.
+  const buckets = new Map<string, Bucket>();
+
   return (req: Request, res: Response, next: NextFunction): void => {
     const now = Date.now();
-    sweep(now);
+    sweep(buckets, now);
 
     const key = clientKey(req);
     let bucket = buckets.get(key);

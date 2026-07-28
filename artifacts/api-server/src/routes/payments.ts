@@ -25,8 +25,14 @@ function getSessionId(req: any): string {
 }
 
 function computeDeliveryDeadline(): Date {
+  // `??` only falls back on null/undefined — an empty string (e.g. a blank
+  // .env value) survives it and Number("") is 0, which would set every
+  // order's deadline to "right now" and let the 5-minute auto-release sweep
+  // pay the seller before the buyer has any real chance to confirm or dispute.
+  const raw = process.env["DELIVERY_AUTO_RELEASE_MINUTES"];
+  const minutes = raw ? Number(raw) : NaN;
   const deadline = new Date();
-  deadline.setMinutes(deadline.getMinutes() + Number(process.env["DELIVERY_AUTO_RELEASE_MINUTES"] ?? 3 * 24 * 60));
+  deadline.setMinutes(deadline.getMinutes() + (Number.isFinite(minutes) && minutes > 0 ? minutes : 3 * 24 * 60));
   return deadline;
 }
 
