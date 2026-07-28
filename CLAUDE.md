@@ -63,6 +63,8 @@ Buyer/seller auth (`req.session.userId`, via `users` table) and admin auth (`req
 
 Session cookie config in `artifacts/api-server/src/app.ts` matters in production: `SESSION_SECRET` must not be left at its dev default (the app refuses to boot in production if it is — anyone with this value can forge sessions, including admin ones), and `SESSION_COOKIE_SAMESITE` must be `"none"` (HTTPS-only) instead of `"lax"` if the API and frontend are ever split across domains.
 
+**Email verification** is tracked (`users.emailVerified`) but not enforced anywhere — signing up sends a verification email (via the existing `lib/mailer.ts` Resend integration) and the frontend shows a persistent "please verify" banner (`components/layout/EmailVerificationBanner.tsx`) until it's done, but no action is currently blocked for unverified accounts. The token lives on the user row (`emailVerificationToken` + `emailVerificationExpiresAt`, 24h TTL) and is cleared once used, so a stale/superseded token always fails rather than silently re-verifying.
+
 ### Escrow and dispute flow
 
 1. Buyer pays → order becomes `paymentStatus: paid`, `deliveryStatus: awaiting_confirmation`; funds are held.

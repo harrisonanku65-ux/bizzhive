@@ -23,4 +23,5 @@ export interface AuthUser {
   avatar?: string | null;
   /** @nullable */
   phone?: string | null;
+  emailVerified: boolean;
 }

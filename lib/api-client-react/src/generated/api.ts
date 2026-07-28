@@ -64,6 +64,7 @@ import type {
   RegisterBody,
   ReportIssueBody,
   ReportIssueResponse,
+  ResendVerificationResponse,
   ResolveDisputeBody,
   ResolveDisputeResponse,
   RespondToReviewBody,
@@ -83,6 +84,8 @@ import type {
   VendorPayoutSettings,
   VendorPayoutSettingsBody,
   VendorStats,
+  VerifyEmailParams,
+  VerifyEmailResponse,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -492,6 +495,184 @@ export const useDeleteAccount = <
   TContext
 > => {
   return useMutation(getDeleteAccountMutationOptions(options));
+};
+
+/**
+ * @summary Verify an email address using the token from the verification email
+ */
+export const getVerifyEmailUrl = (params: VerifyEmailParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/auth/verify-email?${stringifiedParams}`
+    : `/api/auth/verify-email`;
+};
+
+export const verifyEmail = async (
+  params: VerifyEmailParams,
+  options?: RequestInit,
+): Promise<VerifyEmailResponse> => {
+  return customFetch<VerifyEmailResponse>(getVerifyEmailUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getVerifyEmailQueryKey = (params?: VerifyEmailParams) => {
+  return [`/api/auth/verify-email`, ...(params ? [params] : [])] as const;
+};
+
+export const getVerifyEmailQueryOptions = <
+  TData = Awaited<ReturnType<typeof verifyEmail>>,
+  TError = ErrorType<void>,
+>(
+  params: VerifyEmailParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof verifyEmail>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getVerifyEmailQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof verifyEmail>>> = ({
+    signal,
+  }) => verifyEmail(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof verifyEmail>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type VerifyEmailQueryResult = NonNullable<
+  Awaited<ReturnType<typeof verifyEmail>>
+>;
+export type VerifyEmailQueryError = ErrorType<void>;
+
+/**
+ * @summary Verify an email address using the token from the verification email
+ */
+
+export function useVerifyEmail<
+  TData = Awaited<ReturnType<typeof verifyEmail>>,
+  TError = ErrorType<void>,
+>(
+  params: VerifyEmailParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof verifyEmail>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getVerifyEmailQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Resend the verification email to the signed-in user
+ */
+export const getResendVerificationEmailUrl = () => {
+  return `/api/auth/resend-verification`;
+};
+
+export const resendVerificationEmail = async (
+  options?: RequestInit,
+): Promise<ResendVerificationResponse> => {
+  return customFetch<ResendVerificationResponse>(
+    getResendVerificationEmailUrl(),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getResendVerificationEmailMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof resendVerificationEmail>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof resendVerificationEmail>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["resendVerificationEmail"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof resendVerificationEmail>>,
+    void
+  > = () => {
+    return resendVerificationEmail(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ResendVerificationEmailMutationResult = NonNullable<
+  Awaited<ReturnType<typeof resendVerificationEmail>>
+>;
+
+export type ResendVerificationEmailMutationError = ErrorType<void>;
+
+/**
+ * @summary Resend the verification email to the signed-in user
+ */
+export const useResendVerificationEmail = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof resendVerificationEmail>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof resendVerificationEmail>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getResendVerificationEmailMutationOptions(options));
 };
 
 /**

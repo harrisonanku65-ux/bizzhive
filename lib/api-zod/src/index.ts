@@ -38,4 +38,5 @@ export {
   CreateVendorBody,
   UpdateCourseBody,
   UpdateProductBody,
+  VerifyEmailResponse,
 } from "./generated/api";

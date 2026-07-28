@@ -3,8 +3,29 @@ import bcrypt from "bcryptjs";
 import { db, usersTable, vendorsTable, cartItemsTable, coursesTable, productsTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 import crypto from "crypto";
-import { loginRateLimit, registerRateLimit } from "../middlewares/rateLimit";
+import { loginRateLimit, registerRateLimit, resendVerificationRateLimit } from "../middlewares/rateLimit";
 import { logger } from "../lib/logger";
+import { sendEmail } from "../lib/mailer";
+import { VerifyEmailResponse } from "@workspace/api-zod";
+
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+
+function generateVerificationToken() {
+  return {
+    token: crypto.randomBytes(32).toString("hex"),
+    expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
+  };
+}
+
+/** Fire-and-forget — a mail outage must never fail registration or the resend request. */
+function sendVerificationEmail(email: string, token: string) {
+  void sendEmail({
+    to: email,
+    subject: "Verify your BizzHive email",
+    body: "Welcome to BizzHive! Please verify your email address to activate your account.\n\nThis link expires in 24 hours.",
+    action: { label: "Verify Email", path: `/verify-email?token=${token}` },
+  });
+}
 
 const router: IRouter = Router();
 const SALT_ROUNDS = 10;
@@ -66,6 +87,7 @@ function buildAuthUser(user: any) {
     vendorId: user.vendorId,
     avatar: user.avatar,
     phone: user.phone,
+    emailVerified: !!user.emailVerified,
   };
 }
 
@@ -120,6 +142,7 @@ router.post("/auth/register", registerRateLimit, async (req, res): Promise<void>
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const userRole = role === "seller" ? "seller" : "buyer";
+    const { token: verificationToken, expiresAt: verificationExpiresAt } = generateVerificationToken();
 
     const result = await db.transaction(async (tx) => {
       let vendorId: number | null = null;
@@ -144,10 +167,14 @@ router.post("/auth/register", registerRateLimit, async (req, res): Promise<void>
         role: userRole,
         vendorId: vendorId ?? undefined,
         phone: phone ?? null,
+        emailVerificationToken: verificationToken,
+        emailVerificationExpiresAt: verificationExpiresAt,
       }).returning();
 
       return { user, vendorId };
     });
+
+    sendVerificationEmail(result.user.email, verificationToken);
 
     setAuthSession(req, result.user.id, userRole);
     await mergeGuestCartIntoUser(req, result.user.id);
@@ -213,6 +240,67 @@ router.get("/auth/me", async (req, res): Promise<void> => {
 router.post("/auth/logout", (req, res): void => {
   req.session?.destroy?.(() => {});
   res.json({ success: true });
+});
+
+router.get("/auth/verify-email", async (req, res): Promise<void> => {
+  const token = typeof req.query.token === "string" ? req.query.token : "";
+  if (!token) {
+    res.status(400).json({ error: "A verification token is required" });
+    return;
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.emailVerificationToken, token));
+  if (!user) {
+    res.status(400).json({ error: "This verification link is invalid. It may have already been used — try signing in." });
+    return;
+  }
+
+  if (user.emailVerified) {
+    res.json(VerifyEmailResponse.parse({ status: "verified", email: user.email }));
+    return;
+  }
+
+  if (!user.emailVerificationExpiresAt || user.emailVerificationExpiresAt.getTime() < Date.now()) {
+    res.status(400).json({ error: "This verification link has expired. Sign in and request a new one." });
+    return;
+  }
+
+  await db.update(usersTable).set({
+    emailVerified: true,
+    emailVerificationToken: null,
+    emailVerificationExpiresAt: null,
+  }).where(eq(usersTable.id, user.id));
+
+  res.json(VerifyEmailResponse.parse({ status: "verified", email: user.email }));
+});
+
+router.post("/auth/resend-verification", resendVerificationRateLimit, async (req, res): Promise<void> => {
+  const userId = req.session?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  if (!user || user.deletedAt) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  if (user.emailVerified) {
+    res.json({ status: "already_verified" });
+    return;
+  }
+
+  const { token, expiresAt } = generateVerificationToken();
+  await db.update(usersTable).set({
+    emailVerificationToken: token,
+    emailVerificationExpiresAt: expiresAt,
+  }).where(eq(usersTable.id, userId));
+
+  sendVerificationEmail(user.email, token);
+
+  res.json({ status: "sent" });
 });
 
 router.post("/auth/delete-account", async (req, res): Promise<void> => {

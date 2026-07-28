@@ -128,3 +128,11 @@ export const supportRateLimit = rateLimit({
   blockMs: 30 * 60 * 1000,
   message: "You've sent several messages already. We'll reply to those first.",
 });
+
+/** Resending a verification email: 3 per hour per account. */
+export const resendVerificationRateLimit = rateLimit({
+  max: 3,
+  windowMs: 60 * 60 * 1000,
+  blockMs: 60 * 60 * 1000,
+  message: "You've requested this a few times already. Check your inbox (and spam folder), or try again in an hour.",
+});

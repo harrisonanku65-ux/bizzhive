@@ -59,6 +59,7 @@ export interface AuthUser {
   avatar?: string | null;
   /** @nullable */
   phone?: string | null;
+  emailVerified: boolean;
 }
 
 export interface DeleteAccountBody {
@@ -76,6 +77,30 @@ export const DeleteAccountResponseStatus = {
 export interface DeleteAccountResponse {
   status: DeleteAccountResponseStatus;
   message?: string;
+}
+
+export type VerifyEmailResponseStatus =
+  (typeof VerifyEmailResponseStatus)[keyof typeof VerifyEmailResponseStatus];
+
+export const VerifyEmailResponseStatus = {
+  verified: "verified",
+} as const;
+
+export interface VerifyEmailResponse {
+  status: VerifyEmailResponseStatus;
+  email: string;
+}
+
+export type ResendVerificationResponseStatus =
+  (typeof ResendVerificationResponseStatus)[keyof typeof ResendVerificationResponseStatus];
+
+export const ResendVerificationResponseStatus = {
+  sent: "sent",
+  already_verified: "already_verified",
+} as const;
+
+export interface ResendVerificationResponse {
+  status: ResendVerificationResponseStatus;
 }
 
 export interface HealthStatus {
@@ -1057,6 +1082,10 @@ export interface ResolveDisputeResponse {
   payout?: ResolveDisputeResponsePayout;
   resolvedBy?: string;
 }
+
+export type VerifyEmailParams = {
+  token: string;
+};
 
 export type ListVendorsParams = {
   featured?: boolean;

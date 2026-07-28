@@ -50,6 +50,7 @@ export const LoginResponse = zod.object({
   vendorId: zod.number().nullish(),
   avatar: zod.string().nullish(),
   phone: zod.string().nullish(),
+  emailVerified: zod.boolean(),
 });
 
 /**
@@ -65,6 +66,7 @@ export const GetMeResponse = zod.object({
   vendorId: zod.number().nullish(),
   avatar: zod.string().nullish(),
   phone: zod.string().nullish(),
+  emailVerified: zod.boolean(),
 });
 
 /**
@@ -77,6 +79,25 @@ export const DeleteAccountBody = zod.object({
 export const DeleteAccountResponse = zod.object({
   status: zod.enum(["deleted", "anonymized"]),
   message: zod.string().optional(),
+});
+
+/**
+ * @summary Verify an email address using the token from the verification email
+ */
+export const VerifyEmailQueryParams = zod.object({
+  token: zod.coerce.string(),
+});
+
+export const VerifyEmailResponse = zod.object({
+  status: zod.enum(["verified"]),
+  email: zod.string(),
+});
+
+/**
+ * @summary Resend the verification email to the signed-in user
+ */
+export const ResendVerificationEmailResponse = zod.object({
+  status: zod.enum(["sent", "already_verified"]),
 });
 
 /**

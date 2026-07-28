@@ -19,6 +19,7 @@ import GamingHub from "@/pages/gaming-hub";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import PaymentSuccess from "@/pages/payment-success";
+import VerifyEmail from "@/pages/verify-email";
 import HowToSell from "@/pages/how-to-sell";
 import CreatorGuidelines from "@/pages/creator-guidelines";
 import HelpCenter from "@/pages/help-center";
@@ -53,6 +54,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
         <Route path="/payment-success" component={PaymentSuccess} />
+        <Route path="/verify-email" component={VerifyEmail} />
         <Route path="/how-to-sell" component={HowToSell} />
         <Route path="/creator-guidelines" component={CreatorGuidelines} />
         <Route path="/help-center" component={HelpCenter} />
