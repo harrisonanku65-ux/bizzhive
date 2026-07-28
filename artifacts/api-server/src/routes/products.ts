@@ -14,6 +14,7 @@ import {
 } from "@workspace/api-zod";
 import { requireOwnVendorId } from "../middlewares/requireVendor";
 import { countActiveListings, listingLimitForPlan } from "../lib/listingLimits";
+import { getViewerSessionId, hasPurchased } from "../lib/purchases";
 
 const router: IRouter = Router();
 
@@ -152,7 +153,12 @@ router.get("/products/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(GetProductResponse.parse(product));
+  // The downloadable file is only for buyers — previewUrl (audio samples etc.)
+  // stays public, that's the point of a preview.
+  const sessionId = getViewerSessionId(req);
+  const purchased = sessionId ? await hasPurchased(sessionId, "product", product.id) : false;
+
+  res.json(GetProductResponse.parse({ ...product, fileUrl: purchased ? product.fileUrl : null }));
 });
 
 router.patch("/products/:id", async (req, res): Promise<void> => {

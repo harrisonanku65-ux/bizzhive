@@ -20,6 +20,7 @@ import {
 } from "@workspace/api-zod";
 import { requireOwnVendorId } from "../middlewares/requireVendor";
 import { countActiveListings, listingLimitForPlan } from "../lib/listingLimits";
+import { getViewerSessionId, hasPurchased } from "../lib/purchases";
 
 const router: IRouter = Router();
 
@@ -167,7 +168,15 @@ router.get("/courses/:id", async (req, res): Promise<void> => {
     .where(eq(lessonsTable.courseId, params.data.id))
     .orderBy(asc(lessonsTable.sortOrder));
 
-  res.json(GetCourseResponse.parse({ ...course, lessons }));
+  // Free lessons are meant as a public preview; everything else's actual
+  // video/content URL is only for buyers.
+  const sessionId = getViewerSessionId(req);
+  const enrolled = sessionId ? await hasPurchased(sessionId, "course", params.data.id) : false;
+  const gatedLessons = lessons.map((lesson) =>
+    enrolled || lesson.isFree ? lesson : { ...lesson, contentUrl: null },
+  );
+
+  res.json(GetCourseResponse.parse({ ...course, lessons: gatedLessons }));
 });
 
 router.patch("/courses/:id", async (req, res): Promise<void> => {
