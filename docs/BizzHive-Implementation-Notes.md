@@ -85,7 +85,7 @@ These were unrelated to the build list but would have caused real problems:
 
 ## Worth knowing
 
-- **Set `DELIVERY_AUTO_RELEASE_MINUTES`** in `.env`. It defaults to 3 days; for testing, set it low.
+- **Set `DELIVERY_AUTO_RELEASE_MINUTES`** in `.env`. It defaults to 14 days (matching Ghana's Electronic Transactions Act 2008 s.49 cooling-off window — confirm with a lawyer before relying on this for compliance); for testing, set it low.
 - **Paystack refunds need live keys.** Without them the code records a `demo` refund so the flow stays testable end to end, but no money moves.
 - **Vendor cancellation of a booked session doesn't auto-refund.** It marks the slot cancelled and tells the buyer to contact support, who resolves it through the admin console. Automating that is a reasonable next step.
 - **Timezones**: slot times are entered in the vendor's local timezone via `datetime-local` and converted to UTC on submit. Buyers see them rendered in their own locale.

@@ -70,7 +70,7 @@ is deliberately reserved for those — the body of every page stays light.
 ### Escrow and dispute flow
 1. Buyer pays → order is `paymentStatus: paid`, `deliveryStatus: awaiting_confirmation`, funds held.
 2. Buyer either **confirms delivery** (payout released) or **reports a problem** (`deliveryStatus: disputed`).
-3. If the buyer does neither, `deliveryAutoRelease` releases the payout after `DELIVERY_AUTO_RELEASE_MINUTES` (default 3 days).
+3. If the buyer does neither, `deliveryAutoRelease` releases the payout after `DELIVERY_AUTO_RELEASE_MINUTES` (default 14 days — matches the consumer cooling-off window in Ghana's Electronic Transactions Act, 2008 s.49; confirm with a lawyer before relying on this for compliance).
 4. Disputed orders appear in the **admin console** where staff release funds, refund in full, or refund partially. Partial refunds pay the seller on the remainder.
 
 All payment providers funnel through `markOrderPaid()` in `routes/payments.ts` so the escrow deadline, cart clearing and session-slot booking can't drift apart between paths.

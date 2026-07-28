@@ -24,6 +24,12 @@ function getSessionId(req: any): string {
   return req.cookies.session_id;
 }
 
+// 14 days matches the consumer cancellation/cooling-off window in Ghana's
+// Electronic Transactions Act, 2008 (Act 772) s.49 — that section governs
+// buyer cancellation rights, not escrow release specifically, so this is an
+// informed default rather than a confirmed legal requirement.
+const DEFAULT_DELIVERY_AUTO_RELEASE_MINUTES = 14 * 24 * 60;
+
 function computeDeliveryDeadline(): Date {
   // `??` only falls back on null/undefined — an empty string (e.g. a blank
   // .env value) survives it and Number("") is 0, which would set every
@@ -32,7 +38,7 @@ function computeDeliveryDeadline(): Date {
   const raw = process.env["DELIVERY_AUTO_RELEASE_MINUTES"];
   const minutes = raw ? Number(raw) : NaN;
   const deadline = new Date();
-  deadline.setMinutes(deadline.getMinutes() + (Number.isFinite(minutes) && minutes > 0 ? minutes : 3 * 24 * 60));
+  deadline.setMinutes(deadline.getMinutes() + (Number.isFinite(minutes) && minutes > 0 ? minutes : DEFAULT_DELIVERY_AUTO_RELEASE_MINUTES));
   return deadline;
 }
 

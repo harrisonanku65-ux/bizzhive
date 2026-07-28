@@ -51,7 +51,7 @@ export default function Terms() {
             released to the seller. Once you receive your course or product,
             click "Confirm Delivery" to release payment to the seller. If you
             don't confirm and don't report an issue, payment is automatically
-            released to the seller after 3 days. If something is wrong, use
+            released to the seller after 14 days. If something is wrong, use
             "Report an Issue" within that window instead of confirming — this
             pauses release while we review the matter.
           </p>

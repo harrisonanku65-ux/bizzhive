@@ -67,7 +67,7 @@ Session cookie config in `artifacts/api-server/src/app.ts` matters in production
 
 1. Buyer pays → order becomes `paymentStatus: paid`, `deliveryStatus: awaiting_confirmation`; funds are held.
 2. Buyer either **confirms delivery** (releases payout) or **reports a problem** (`deliveryStatus: disputed`).
-3. If the buyer does neither, `deliveryAutoRelease` (`artifacts/api-server/src/lib/deliveryAutoRelease.ts`) releases the payout after `DELIVERY_AUTO_RELEASE_MINUTES` (default 4320 = 3 days). This timer is started exactly once, in `app.ts` after the app is wired — don't add a second call site.
+3. If the buyer does neither, `deliveryAutoRelease` (`artifacts/api-server/src/lib/deliveryAutoRelease.ts`) releases the payout after `DELIVERY_AUTO_RELEASE_MINUTES` (default 20160 = 14 days, matching Ghana's Electronic Transactions Act 2008 s.49 cooling-off window — an informed default, not a confirmed legal requirement). This timer is started exactly once, in `app.ts` after the app is wired — don't add a second call site.
 4. Disputed orders surface in the admin console (`/admin`), where staff release funds, refund in full, or refund partially (partial refunds still pay the seller the remainder).
 
 **All** payment providers funnel through `markOrderPaid()` in `routes/payments.ts` so escrow deadline, cart clearing, and session-slot booking can't drift apart between payment paths (Paystack, Flutterwave, demo mode). Route any new payment integration through this same function rather than duplicating its side effects.

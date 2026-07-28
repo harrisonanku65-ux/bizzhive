@@ -16,7 +16,7 @@ export default function RefundPolicy() {
             1. How payments are held
           </h2>
           <p>
-            When you buy a course or product, your payment is held for up to 3
+            When you buy a course or product, your payment is held for up to 14
             days before being released to the seller, giving you time to confirm
             you received what you paid for.
           </p>
@@ -27,7 +27,7 @@ export default function RefundPolicy() {
           </h2>
           <p>
             If there's a problem with your order, use "Report an Issue" from
-            your Orders page within the 3-day window instead of confirming
+            your Orders page within the 14-day window instead of confirming
             delivery. This pauses the payment release while we review your case,
             and we'll work with you and the seller toward a resolution, which
             may include a refund.
@@ -38,7 +38,7 @@ export default function RefundPolicy() {
             3. After payment has been released
           </h2>
           <p>
-            Once you've confirmed delivery, or the 3-day window has passed,
+            Once you've confirmed delivery, or the 14-day window has passed,
             payment has already been sent to the seller. Refunds at this stage
             are handled case by case and may require the seller's cooperation —
             contact us and we'll help mediate.
