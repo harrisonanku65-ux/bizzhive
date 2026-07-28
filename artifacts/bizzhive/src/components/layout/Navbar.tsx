@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Store,
   CalendarClock,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,13 +25,6 @@ import { useGetCart } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
-import { useDeleteAccount } from "@workspace/api-client-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 export function Navbar() {
   const [location, navigate] = useLocation();
@@ -89,28 +83,7 @@ export function Navbar() {
     </>
   );
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletePassword, setDeletePassword] = useState("");
-  const [deleteError, setDeleteError] = useState("");
-  const deleteAccount = useDeleteAccount();
-
-  const handleDeleteAccount = () => {
-    setDeleteError("");
-    deleteAccount.mutate(
-      { data: { password: deletePassword } },
-      {
-        onSuccess: () => {
-          window.location.href = "/";
-        },
-        onError: (err: any) => {
-          setDeleteError(err?.message ?? "Failed to delete account");
-        },
-      },
-    );
-  };
-
   return (
-    <>
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
@@ -166,6 +139,9 @@ export function Navbar() {
                     </Link>
                     <Link href="/bookings" className="text-lg font-medium">
                       My Bookings
+                    </Link>
+                    <Link href="/settings" className="text-lg font-medium">
+                      Account Settings
                     </Link>
                   </>
                 )}
@@ -299,17 +275,19 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/settings"
+                    className="w-full cursor-pointer flex items-center gap-2"
+                  >
+                    <Settings className="h-4 w-4" /> Account Settings
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={logout}
                   className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer flex items-center gap-2"
                 >
                   <LogOut className="h-4 w-4" /> Log out
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer flex items-center gap-2"
-                >
-                  Delete Account
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -335,52 +313,5 @@ export function Navbar() {
         </div>
       </div>
     </header>
-
-    {/* This dialog previously sat after the `return`, so it was unreachable
-        dead code — the Delete Account menu item set state but nothing
-        rendered. It now lives inside the returned tree. */}
-    <Dialog
-      open={deleteDialogOpen}
-      onOpenChange={(v) => {
-        setDeleteDialogOpen(v);
-        if (!v) {
-          setDeletePassword("");
-          setDeleteError("");
-        }
-      }}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Account</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            This will permanently remove your personal data. Enter your
-            password to confirm.
-          </p>
-          {deleteError && (
-            <p className="text-sm text-destructive">{deleteError}</p>
-          )}
-          <input
-            type="password"
-            placeholder="Password"
-            value={deletePassword}
-            onChange={(e) => setDeletePassword(e.target.value)}
-            className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-          />
-          <Button
-            variant="destructive"
-            className="w-full"
-            onClick={handleDeleteAccount}
-            disabled={deleteAccount.isPending || !deletePassword}
-          >
-            {deleteAccount.isPending
-              ? "Deleting..."
-              : "Permanently Delete Account"}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-    </>
   );
 }

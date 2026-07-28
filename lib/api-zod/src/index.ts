@@ -12,6 +12,7 @@ export type * from "./generated/types";
 // call `.safeParse()` on resolve in favor of the value instead.
 export type {
   AdminLoginBody,
+  ChangePasswordBody,
   CloseSupportTicketBody,
   CloseSupportTicketResponse,
   ConfirmDeliveryResponse,
@@ -27,11 +28,13 @@ export type {
   RespondToReviewBody,
   SubscribeVendorBody,
   SubscribeVendorResponse,
+  UpdateProfileBody,
   UpdateSessionSlotBody,
 } from "./generated/types";
 
 export {
   AddToCartBody,
+  ChangePasswordResponse,
   CreateCourseBody,
   CreateLessonBody,
   CreateProductBody,

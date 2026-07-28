@@ -70,6 +70,42 @@ export const GetMeResponse = zod.object({
 });
 
 /**
+ * @summary Update the signed-in user's profile
+ */
+export const UpdateProfileBody = zod.object({
+  firstName: zod.string().optional(),
+  lastName: zod.string().optional(),
+  displayName: zod.string().optional(),
+  phone: zod.string().optional(),
+  avatar: zod.string().optional(),
+});
+
+export const UpdateProfileResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  firstName: zod.string().nullish(),
+  lastName: zod.string().nullish(),
+  displayName: zod.string().nullish(),
+  role: zod.enum(["buyer", "seller", "admin"]),
+  vendorId: zod.number().nullish(),
+  avatar: zod.string().nullish(),
+  phone: zod.string().nullish(),
+  emailVerified: zod.boolean(),
+});
+
+/**
+ * @summary Change the signed-in user's password
+ */
+export const ChangePasswordBody = zod.object({
+  currentPassword: zod.string(),
+  newPassword: zod.string(),
+});
+
+export const ChangePasswordResponse = zod.object({
+  status: zod.enum(["changed"]),
+});
+
+/**
  * @summary Delete or anonymize the current user's account
  */
 export const DeleteAccountBody = zod.object({

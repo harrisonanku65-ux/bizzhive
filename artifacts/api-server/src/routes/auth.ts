@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { loginRateLimit, registerRateLimit, resendVerificationRateLimit } from "../middlewares/rateLimit";
 import { logger } from "../lib/logger";
 import { sendEmail } from "../lib/mailer";
-import { VerifyEmailResponse } from "@workspace/api-zod";
+import { VerifyEmailResponse, ChangePasswordResponse } from "@workspace/api-zod";
 
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -240,6 +240,79 @@ router.get("/auth/me", async (req, res): Promise<void> => {
 router.post("/auth/logout", (req, res): void => {
   req.session?.destroy?.(() => {});
   res.json({ success: true });
+});
+
+router.patch("/auth/profile", async (req, res): Promise<void> => {
+  const userId = req.session?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  const { firstName, lastName, displayName, phone, avatar } = req.body ?? {};
+
+  const updates: Record<string, unknown> = {};
+  if (firstName !== undefined) updates.firstName = firstName;
+  if (lastName !== undefined) updates.lastName = lastName;
+  if (displayName !== undefined) updates.displayName = displayName;
+  if (phone !== undefined) updates.phone = phone;
+  if (avatar !== undefined) updates.avatar = avatar;
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ error: "No fields to update" });
+    return;
+  }
+
+  updates.updatedAt = new Date();
+
+  const [updated] = await db.update(usersTable).set(updates).where(eq(usersTable.id, userId)).returning();
+  if (!updated) {
+    res.status(404).json({ error: "Account not found" });
+    return;
+  }
+
+  res.json(buildAuthUser(updated));
+});
+
+router.post("/auth/change-password", async (req, res): Promise<void> => {
+  const userId = req.session?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  const { currentPassword, newPassword } = req.body ?? {};
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ error: "currentPassword and newPassword are required" });
+    return;
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  if (!user) {
+    res.status(404).json({ error: "Account not found" });
+    return;
+  }
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) {
+    res.status(401).json({ error: "Current password is incorrect" });
+    return;
+  }
+
+  const passwordError = validatePassword(newPassword, {
+    email: user.email,
+    firstName: user.firstName ?? undefined,
+    lastName: user.lastName ?? undefined,
+  });
+  if (passwordError) {
+    res.status(400).json({ error: passwordError });
+    return;
+  }
+
+  const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await db.update(usersTable).set({ passwordHash: newHash, updatedAt: new Date() }).where(eq(usersTable.id, userId));
+
+  res.json(ChangePasswordResponse.parse({ status: "changed" }));
 });
 
 router.get("/auth/verify-email", async (req, res): Promise<void> => {

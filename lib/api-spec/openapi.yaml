@@ -108,6 +108,50 @@ paths:
         "200":
           description: Logged out
 
+  /auth/profile:
+    patch:
+      operationId: updateProfile
+      tags: [auth]
+      summary: Update the signed-in user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+
+  /auth/change-password:
+    post:
+      operationId: changePassword
+      tags: [auth]
+      summary: Change the signed-in user's password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordBody"
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangePasswordResponse"
+        "400":
+          description: Validation error
+        "401":
+          description: Not authenticated or current password incorrect
+
   /auth/delete-account:
     post:
       operationId: deleteAccount
@@ -1570,6 +1614,37 @@ components:
         status:
           type: string
           enum: [sent, already_verified]
+      required: [status]
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        displayName:
+          type: string
+        phone:
+          type: string
+        avatar:
+          type: string
+
+    ChangePasswordBody:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+      required: [currentPassword, newPassword]
+
+    ChangePasswordResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [changed]
       required: [status]
 
     HealthStatus:

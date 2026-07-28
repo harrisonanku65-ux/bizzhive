@@ -103,6 +103,30 @@ export interface ResendVerificationResponse {
   status: ResendVerificationResponseStatus;
 }
 
+export interface UpdateProfileBody {
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
+  phone?: string;
+  avatar?: string;
+}
+
+export interface ChangePasswordBody {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export type ChangePasswordResponseStatus =
+  (typeof ChangePasswordResponseStatus)[keyof typeof ChangePasswordResponseStatus];
+
+export const ChangePasswordResponseStatus = {
+  changed: "changed",
+} as const;
+
+export interface ChangePasswordResponse {
+  status: ChangePasswordResponseStatus;
+}
+
 export interface HealthStatus {
   status: string;
 }

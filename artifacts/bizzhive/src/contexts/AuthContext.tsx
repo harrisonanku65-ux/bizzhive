@@ -15,6 +15,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  /** Updates the locally-held user (e.g. after a profile edit) without a round-trip to /auth/me. */
+  updateUser: (user: AuthUser) => void;
 }
 
 export interface RegisterData {
@@ -85,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       logout,
+      updateUser: setUser,
     }}>
       {children}
     </AuthContext.Provider>
