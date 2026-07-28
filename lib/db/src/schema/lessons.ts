@@ -10,6 +10,7 @@ export const lessonsTable = pgTable("lessons", {
   duration: text("duration"),
   sortOrder: integer("sort_order").notNull().default(0),
   isFree: boolean("is_free").notNull().default(false),
+   contentUrl: text("content_url"),
   courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
 });
 

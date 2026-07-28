@@ -15,7 +15,10 @@ export const RegisterBodyRole = {
 
 export interface RegisterBody {
   email: string;
-  /** @minLength 6 */
+  /**
+   * At least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol. Must not be a common password or contain the user's own name or email.
+   * @minLength 8
+   */
   password: string;
   firstName: string;
   lastName: string;
@@ -58,6 +61,23 @@ export interface AuthUser {
   phone?: string | null;
 }
 
+export interface DeleteAccountBody {
+  password: string;
+}
+
+export type DeleteAccountResponseStatus =
+  (typeof DeleteAccountResponseStatus)[keyof typeof DeleteAccountResponseStatus];
+
+export const DeleteAccountResponseStatus = {
+  deleted: "deleted",
+  anonymized: "anonymized",
+} as const;
+
+export interface DeleteAccountResponse {
+  status: DeleteAccountResponseStatus;
+  message?: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -74,6 +94,14 @@ export interface Category {
   productCount: number;
 }
 
+export type VendorPlan = (typeof VendorPlan)[keyof typeof VendorPlan];
+
+export const VendorPlan = {
+  free: "free",
+  pro: "pro",
+  premium: "premium",
+} as const;
+
 export interface Vendor {
   id: number;
   name: string;
@@ -89,6 +117,10 @@ export interface Vendor {
   totalCourses: number;
   totalProducts: number;
   featured: boolean;
+  plan: VendorPlan;
+  /** @nullable */
+  planExpiresAt?: string | null;
+  verifiedSeller: boolean;
   createdAt: string;
 }
 
@@ -153,6 +185,8 @@ export interface Lesson {
   duration?: string | null;
   sortOrder: number;
   isFree: boolean;
+  /** @nullable */
+  contentUrl?: string | null;
   courseId: number;
 }
 
@@ -236,6 +270,7 @@ export interface CreateLessonBody {
   duration?: string;
   sortOrder: number;
   isFree?: boolean;
+  contentUrl?: string;
 }
 
 export type ProductProductType =
@@ -246,6 +281,7 @@ export const ProductProductType = {
   template: "template",
   software: "software",
   asset: "asset",
+  audio: "audio",
   other: "other",
 } as const;
 
@@ -262,6 +298,10 @@ export interface Product {
   productType: ProductProductType;
   /** @nullable */
   fileUrl?: string | null;
+  /** @nullable */
+  previewUrl?: string | null;
+  /** @nullable */
+  licenseTerms?: string | null;
   rating: number;
   reviewsCount: number;
   salesCount: number;
@@ -284,6 +324,7 @@ export const CreateProductBodyProductType = {
   template: "template",
   software: "software",
   asset: "asset",
+  audio: "audio",
   other: "other",
 } as const;
 
@@ -295,6 +336,10 @@ export interface CreateProductBody {
   currency?: string;
   productType: CreateProductBodyProductType;
   fileUrl?: string;
+  /** Streamable preview clip — used for audio/beat listings. */
+  previewUrl?: string;
+  /** Licensing terms the buyer agrees to (audio/beat listings). */
+  licenseTerms?: string;
   vendorId: number;
   categoryId: number;
 }
@@ -307,6 +352,7 @@ export const UpdateProductBodyProductType = {
   template: "template",
   software: "software",
   asset: "asset",
+  audio: "audio",
   other: "other",
 } as const;
 
@@ -318,10 +364,23 @@ export interface UpdateProductBody {
   currency?: string;
   productType?: UpdateProductBodyProductType;
   fileUrl?: string;
+  /** Streamable preview clip — used for audio/beat listings. */
+  previewUrl?: string;
+  /** Licensing terms the buyer agrees to (audio/beat listings). */
+  licenseTerms?: string;
   categoryId?: number;
   published?: boolean;
   featured?: boolean;
 }
+
+export type ReviewTargetType =
+  (typeof ReviewTargetType)[keyof typeof ReviewTargetType];
+
+export const ReviewTargetType = {
+  course: "course",
+  product: "product",
+  vendor: "vendor",
+} as const;
 
 export interface Review {
   id: number;
@@ -329,7 +388,55 @@ export interface Review {
   /** @nullable */
   comment?: string | null;
   userName: string;
+  targetType?: ReviewTargetType;
+  /** @nullable */
+  courseId?: number | null;
+  /** @nullable */
+  productId?: number | null;
+  /** @nullable */
+  vendorId?: number | null;
+  /** @nullable */
+  vendorResponse?: string | null;
+  /** @nullable */
+  vendorRespondedAt?: string | null;
   createdAt: string;
+}
+
+export type ManagedReviewTargetType =
+  (typeof ManagedReviewTargetType)[keyof typeof ManagedReviewTargetType];
+
+export const ManagedReviewTargetType = {
+  course: "course",
+  product: "product",
+  vendor: "vendor",
+} as const;
+
+/**
+ * A review plus the title of whatever it was left on.
+ */
+export interface ManagedReview {
+  id: number;
+  rating: number;
+  /** @nullable */
+  comment?: string | null;
+  userName: string;
+  targetType: ManagedReviewTargetType;
+  /** @nullable */
+  courseId?: number | null;
+  /** @nullable */
+  productId?: number | null;
+  /** @nullable */
+  vendorId?: number | null;
+  /** @nullable */
+  vendorResponse?: string | null;
+  /** @nullable */
+  vendorRespondedAt?: string | null;
+  itemTitle: string;
+  createdAt: string;
+}
+
+export interface RespondToReviewBody {
+  response: string;
 }
 
 export interface CreateReviewBody {
@@ -348,6 +455,7 @@ export type CartItemItemType =
 export const CartItemItemType = {
   course: "course",
   product: "product",
+  session: "session",
 } as const;
 
 export interface CartItem {
@@ -359,7 +467,12 @@ export interface CartItem {
   thumbnail?: string | null;
   price: number;
   currency: string;
+  vendorId?: number;
   vendorName: string;
+  /** @nullable */
+  startsAt?: string | null;
+  /** @nullable */
+  durationMinutes?: number | null;
 }
 
 export interface Cart {
@@ -375,6 +488,7 @@ export type AddToCartBodyItemType =
 export const AddToCartBodyItemType = {
   course: "course",
   product: "product",
+  session: "session",
 } as const;
 
 export interface AddToCartBody {
@@ -388,6 +502,18 @@ export const OrderStatus = {
   pending: "pending",
   completed: "completed",
   cancelled: "cancelled",
+  refunded: "refunded",
+} as const;
+
+export type OrderDeliveryStatus =
+  (typeof OrderDeliveryStatus)[keyof typeof OrderDeliveryStatus];
+
+export const OrderDeliveryStatus = {
+  awaiting_confirmation: "awaiting_confirmation",
+  confirmed: "confirmed",
+  disputed: "disputed",
+  auto_released: "auto_released",
+  resolved: "resolved",
 } as const;
 
 export interface Order {
@@ -396,7 +522,35 @@ export interface Order {
   total: number;
   currency: string;
   status: OrderStatus;
+  deliveryStatus?: OrderDeliveryStatus;
+  /** @nullable */
+  deliveryDeadline?: string | null;
+  paymentStatus?: string;
+  /** @nullable */
+  disputeReason?: string | null;
+  /** @nullable */
+  resolution?: string | null;
+  refundedAmount?: number;
   createdAt: string;
+}
+
+/**
+ * @nullable
+ */
+export type ConfirmDeliveryResponsePayout = { [key: string]: unknown } | null;
+
+export interface ConfirmDeliveryResponse {
+  status: string;
+  /** @nullable */
+  payout?: ConfirmDeliveryResponsePayout;
+}
+
+export interface ReportIssueBody {
+  reason: string;
+}
+
+export interface ReportIssueResponse {
+  status: string;
 }
 
 export interface DashboardStats {
@@ -548,6 +702,28 @@ export interface VendorPayoutSettings {
   payoutPercentage: number;
 }
 
+export type SubscribeVendorBodyTier =
+  (typeof SubscribeVendorBodyTier)[keyof typeof SubscribeVendorBodyTier];
+
+export const SubscribeVendorBodyTier = {
+  pro: "pro",
+  premium: "premium",
+} as const;
+
+export interface SubscribeVendorBody {
+  email: string;
+  tier: SubscribeVendorBodyTier;
+}
+
+export interface SubscribeVendorResponse {
+  vendorId: number;
+  tier: string;
+  reference: string;
+  paymentUrl: string;
+  accessCode?: string;
+  paystackPublicKey: string;
+}
+
 export type PayoutResultPayoutsItem = {
   vendorId: number;
   vendorName: string;
@@ -559,6 +735,327 @@ export type PayoutResultPayoutsItem = {
 export interface PayoutResult {
   orderId: number;
   payouts: PayoutResultPayoutsItem[];
+}
+
+export type SessionSlotStatus =
+  (typeof SessionSlotStatus)[keyof typeof SessionSlotStatus];
+
+export const SessionSlotStatus = {
+  available: "available",
+  booked: "booked",
+  completed: "completed",
+  cancelled: "cancelled",
+} as const;
+
+export interface SessionSlot {
+  id: number;
+  vendorId: number;
+  vendorName?: string;
+  categoryId: number;
+  categoryName?: string;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  startsAt: string;
+  durationMinutes: number;
+  price: number;
+  currency: string;
+  status: SessionSlotStatus;
+  published: boolean;
+  /** @nullable */
+  meetingUrl?: string | null;
+  /** @nullable */
+  meetingNotes?: string | null;
+  createdAt: string;
+}
+
+export interface CreateSessionSlotBody {
+  vendorId: number;
+  categoryId: number;
+  title: string;
+  description?: string;
+  startsAt: string;
+  durationMinutes?: number;
+  price: number;
+  meetingUrl?: string;
+  meetingNotes?: string;
+}
+
+export interface UpdateSessionSlotBody {
+  title?: string;
+  description?: string;
+  startsAt?: string;
+  durationMinutes?: number;
+  price?: number;
+  meetingUrl?: string;
+  meetingNotes?: string;
+  published?: boolean;
+}
+
+export interface DeleteSessionSlotResponse {
+  id: number;
+  deleted: boolean;
+}
+
+export interface SessionSlotStatusResponse {
+  id: number;
+  status: string;
+}
+
+export type CreateSupportTicketBodyRequesterRole =
+  (typeof CreateSupportTicketBodyRequesterRole)[keyof typeof CreateSupportTicketBodyRequesterRole];
+
+export const CreateSupportTicketBodyRequesterRole = {
+  buyer: "buyer",
+  seller: "seller",
+  other: "other",
+} as const;
+
+export interface CreateSupportTicketBody {
+  name: string;
+  email: string;
+  subject?: string;
+  /** @minLength 10 */
+  message: string;
+  requesterRole?: CreateSupportTicketBodyRequesterRole;
+}
+
+export type SupportTicketCreatedPriority =
+  (typeof SupportTicketCreatedPriority)[keyof typeof SupportTicketCreatedPriority];
+
+export const SupportTicketCreatedPriority = {
+  priority: "priority",
+  standard: "standard",
+  normal: "normal",
+} as const;
+
+export interface SupportTicketCreated {
+  id: number;
+  priority: SupportTicketCreatedPriority;
+  status: string;
+  expectedResponse: string;
+  createdAt: string;
+}
+
+export type SupportPriorityPriority =
+  (typeof SupportPriorityPriority)[keyof typeof SupportPriorityPriority];
+
+export const SupportPriorityPriority = {
+  priority: "priority",
+  standard: "standard",
+  normal: "normal",
+} as const;
+
+export interface SupportPriority {
+  priority: SupportPriorityPriority;
+  /** @nullable */
+  plan?: string | null;
+}
+
+export type SupportTicketPriority =
+  (typeof SupportTicketPriority)[keyof typeof SupportTicketPriority];
+
+export const SupportTicketPriority = {
+  priority: "priority",
+  standard: "standard",
+  normal: "normal",
+} as const;
+
+export type SupportTicketStatus =
+  (typeof SupportTicketStatus)[keyof typeof SupportTicketStatus];
+
+export const SupportTicketStatus = {
+  open: "open",
+  closed: "closed",
+} as const;
+
+export interface SupportTicket {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  requesterRole?: string;
+  /** @nullable */
+  userId?: number | null;
+  /** @nullable */
+  vendorId?: number | null;
+  /** @nullable */
+  vendorPlan?: string | null;
+  priority: SupportTicketPriority;
+  status: SupportTicketStatus;
+  /** @nullable */
+  adminNotes?: string | null;
+  /** @nullable */
+  closedAt?: string | null;
+  createdAt: string;
+}
+
+export interface CloseSupportTicketBody {
+  adminNotes?: string;
+}
+
+export interface CloseSupportTicketResponse {
+  id: number;
+  status: string;
+}
+
+export interface RevenueTrendPoint {
+  /** YYYY-MM */
+  month: string;
+  revenue: number;
+  units: number;
+}
+
+export interface TopListing {
+  title: string;
+  /** @nullable */
+  itemType?: string | null;
+  revenue: number;
+  units: number;
+}
+
+export interface AdvancedAnalytics {
+  uniqueBuyers: number;
+  repeatBuyers: number;
+  repeatBuyerRate: number;
+  averageOrderValue: number;
+  fundsHeldInEscrow: number;
+  payoutPercentage?: number;
+}
+
+export type VendorAnalyticsPlan =
+  (typeof VendorAnalyticsPlan)[keyof typeof VendorAnalyticsPlan];
+
+export const VendorAnalyticsPlan = {
+  free: "free",
+  pro: "pro",
+  premium: "premium",
+} as const;
+
+export type VendorAnalyticsTier =
+  (typeof VendorAnalyticsTier)[keyof typeof VendorAnalyticsTier];
+
+export const VendorAnalyticsTier = {
+  basic: "basic",
+  standard: "standard",
+  advanced: "advanced",
+} as const;
+
+export type VendorAnalyticsSummary = {
+  totalRevenue: number;
+  unitsSold: number;
+  orderCount: number;
+};
+
+export interface VendorAnalytics {
+  vendorId: number;
+  plan: VendorAnalyticsPlan;
+  tier: VendorAnalyticsTier;
+  locked: boolean;
+  currency: string;
+  upgradeMessage?: string;
+  summary: VendorAnalyticsSummary;
+  revenueTrend: RevenueTrendPoint[];
+  topListings: TopListing[];
+  advanced?: AdvancedAnalytics;
+}
+
+export interface AdminLoginBody {
+  email: string;
+  password: string;
+}
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  name: string;
+}
+
+export interface AdminOverview {
+  openDisputes: number;
+  awaitingConfirmation: number;
+  openTickets: number;
+  priorityTickets: number;
+  fundsHeldInEscrow: number;
+}
+
+export interface DisputeOrderItem {
+  title: string;
+  price: number;
+  itemType?: string;
+  /** @nullable */
+  vendorName?: string | null;
+}
+
+export interface DisputeOrder {
+  id: number;
+  total: number;
+  currency: string;
+  status: string;
+  paymentStatus: string;
+  /** @nullable */
+  paymentProvider?: string | null;
+  /** @nullable */
+  paymentReference?: string | null;
+  deliveryStatus: string;
+  /** @nullable */
+  disputeReason?: string | null;
+  /** @nullable */
+  disputeRaisedAt?: string | null;
+  payoutStatus: string;
+  refundedAmount: number;
+  refundableAmount: number;
+  /** @nullable */
+  resolution?: string | null;
+  /** @nullable */
+  resolutionNotes?: string | null;
+  /** @nullable */
+  resolvedAt?: string | null;
+  /** @nullable */
+  buyerEmail?: string | null;
+  /** @nullable */
+  buyerName?: string | null;
+  vendorNames: string[];
+  items: DisputeOrderItem[];
+  createdAt: string;
+}
+
+export type ResolveDisputeBodyResolution =
+  (typeof ResolveDisputeBodyResolution)[keyof typeof ResolveDisputeBodyResolution];
+
+export const ResolveDisputeBodyResolution = {
+  released: "released",
+  refunded_full: "refunded_full",
+  refunded_partial: "refunded_partial",
+} as const;
+
+export interface ResolveDisputeBody {
+  resolution: ResolveDisputeBodyResolution;
+  /** Required for refunded_partial; must be less than the refundable total. */
+  amount?: number;
+  notes?: string;
+}
+
+/**
+ * @nullable
+ */
+export type ResolveDisputeResponseRefund = { [key: string]: unknown } | null;
+
+/**
+ * @nullable
+ */
+export type ResolveDisputeResponsePayout = { [key: string]: unknown } | null;
+
+export interface ResolveDisputeResponse {
+  orderId: number;
+  resolution: string;
+  refundedAmount: number;
+  /** @nullable */
+  refund?: ResolveDisputeResponseRefund;
+  /** @nullable */
+  payout?: ResolveDisputeResponsePayout;
+  resolvedBy?: string;
 }
 
 export type ListVendorsParams = {
@@ -623,4 +1120,35 @@ export const ListProductsSortBy = {
   price_low: "price_low",
   price_high: "price_high",
   rating: "rating",
+} as const;
+
+export type ListSessionSlotsParams = {
+  vendorId?: number;
+  categoryId?: number;
+};
+
+export type ListDisputesParams = {
+  status?: ListDisputesStatus;
+};
+
+export type ListDisputesStatus =
+  (typeof ListDisputesStatus)[keyof typeof ListDisputesStatus];
+
+export const ListDisputesStatus = {
+  open: "open",
+  resolved: "resolved",
+  all: "all",
+} as const;
+
+export type ListSupportTicketsParams = {
+  status?: ListSupportTicketsStatus;
+};
+
+export type ListSupportTicketsStatus =
+  (typeof ListSupportTicketsStatus)[keyof typeof ListSupportTicketsStatus];
+
+export const ListSupportTicketsStatus = {
+  open: "open",
+  closed: "closed",
+  all: "all",
 } as const;

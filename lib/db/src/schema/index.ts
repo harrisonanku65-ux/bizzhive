@@ -7,3 +7,6 @@ export * from "./reviews";
 export * from "./cart";
 export * from "./orders";
 export * from "./users";
+export * from "./admins";
+export * from "./sessionSlots";
+export * from "./supportTickets";

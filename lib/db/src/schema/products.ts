@@ -14,6 +14,13 @@ export const productsTable = pgTable("products", {
   currency: text("currency").notNull().default("GHS"),
   productType: text("product_type").notNull().default("other"),
   fileUrl: text("file_url"),
+
+  // Audio/music listings: a short streamable preview shown before purchase, and
+  // the licensing terms the buyer is agreeing to. Required for the "Beats &
+  // Music" category, where buying without hearing it first makes no sense.
+  previewUrl: text("preview_url"),
+  licenseTerms: text("license_terms"),
+
   rating: real("rating").notNull().default(0),
   reviewsCount: integer("reviews_count").notNull().default(0),
   salesCount: integer("sales_count").notNull().default(0),

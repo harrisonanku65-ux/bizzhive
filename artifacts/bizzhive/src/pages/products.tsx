@@ -1,21 +1,35 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useListProducts, useListCategories } from "@workspace/api-client-react";
+import {
+  useListProducts,
+  useListCategories,
+} from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Star, ShoppingBag, Search } from "lucide-react";
 
 export default function Products() {
-  const [search, setSearch] = useState("");
+  // Seed from ?search= so the navbar search (and shared links) land on a
+  // pre-filtered list rather than an empty one.
+  const [search, setSearch] = useState(
+    () => new URLSearchParams(window.location.search).get("search") ?? "",
+  );
   const [categoryId, setCategoryId] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("newest");
 
   const params: any = { sortBy };
   if (search) params.search = search;
-  if (categoryId && categoryId !== "all") params.categoryId = parseInt(categoryId);
+  if (categoryId && categoryId !== "all")
+    params.categoryId = parseInt(categoryId);
   if (type && type !== "all") params.type = type;
 
   const { data: products, isLoading } = useListProducts(params);
@@ -24,8 +38,12 @@ export default function Products() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold mb-2">Digital Products</h1>
-        <p className="text-muted-foreground">Templates, ebooks, design assets, and more from Ghanaian creators</p>
+        <h1 className="text-3xl font-display font-bold mb-2">
+          Digital Products
+        </h1>
+        <p className="text-muted-foreground">
+          Templates, ebooks, design assets, and more from Ghanaian creators
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -40,16 +58,22 @@ export default function Products() {
           />
         </div>
         <Select value={categoryId} onValueChange={setCategoryId}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Category" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories?.map((cat) => (
-              <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={type} onValueChange={setType}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="ebook">Ebook</SelectItem>
@@ -60,7 +84,9 @@ export default function Products() {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Sort by" /></SelectTrigger>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest</SelectItem>
             <SelectItem value="popular">Most Popular</SelectItem>
@@ -73,7 +99,9 @@ export default function Products() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1,2,3,4].map(i => <Skeleton key={i} className="h-72 rounded-xl" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-72 rounded-xl" />
+          ))}
         </div>
       ) : products && products.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -82,24 +110,42 @@ export default function Products() {
               <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all border-border/60 hover:border-primary/30 h-full">
                 <div className="aspect-[4/3] bg-gradient-to-br from-secondary/20 to-primary/10 relative">
                   {product.thumbnail ? (
-                    <img src={product.thumbnail} alt={product.title} className="w-full h-full object-cover" />
+                    <img
+                      src={product.thumbnail}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <ShoppingBag className="h-10 w-10 text-primary/40" />
                     </div>
                   )}
-                  <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground">{product.productType}</Badge>
+                  <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground">
+                    {product.productType}
+                  </Badge>
                 </div>
                 <CardContent className="p-4">
-                  <p className="text-xs text-muted-foreground mb-1">{product.categoryName}</p>
-                  <h3 className="font-semibold text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors">{product.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-2">{product.vendorName}</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {product.categoryName}
+                  </p>
+                  <h3 className="font-semibold text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+                    {product.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {product.vendorName}
+                  </p>
                   <div className="flex items-center gap-2 mb-2">
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    <span className="text-xs font-medium">{product.rating.toFixed(1)}</span>
-                    <span className="text-xs text-muted-foreground">({product.salesCount} sold)</span>
+                    <span className="text-xs font-medium">
+                      {product.rating.toFixed(1)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({product.salesCount} sold)
+                    </span>
                   </div>
-                  <span className="text-base font-bold text-primary font-display">GHS {product.price.toFixed(2)}</span>
+                  <span className="text-base font-bold text-primary font-display">
+                    GHS {product.price.toFixed(2)}
+                  </span>
                 </CardContent>
               </Card>
             </Link>
@@ -109,7 +155,9 @@ export default function Products() {
         <div className="text-center py-16">
           <ShoppingBag className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No products found</h3>
-          <p className="text-muted-foreground text-sm">Try adjusting your search or filters</p>
+          <p className="text-muted-foreground text-sm">
+            Try adjusting your search or filters
+          </p>
         </div>
       )}
     </div>

@@ -4,7 +4,11 @@ import type { AuthUser } from "@workspace/api-client-react";
 
 interface AuthContextValue {
   user: AuthUser | null;
+  /** True only during the initial "am I signed in?" session check. */
   isLoading: boolean;
+  /** In-flight state of the login / register requests themselves. */
+  isLoggingIn: boolean;
+  isRegistering: boolean;
   isAuthenticated: boolean;
   isBuyer: boolean;
   isSeller: boolean;
@@ -73,6 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       isLoading,
+      isLoggingIn: loginMutation.isPending,
+      isRegistering: registerMutation.isPending,
       isAuthenticated: !!user,
       isBuyer: user?.role === "buyer",
       isSeller: user?.role === "seller",

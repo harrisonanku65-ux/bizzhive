@@ -15,6 +15,10 @@ export interface CreateProductBody {
   currency?: string;
   productType: CreateProductBodyProductType;
   fileUrl?: string;
+  /** Streamable preview clip — used for audio/beat listings. */
+  previewUrl?: string;
+  /** Licensing terms the buyer agrees to (audio/beat listings). */
+  licenseTerms?: string;
   vendorId: number;
   categoryId: number;
 }

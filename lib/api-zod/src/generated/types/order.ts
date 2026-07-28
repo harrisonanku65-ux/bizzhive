@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CartItem } from "./cartItem";
+import type { OrderDeliveryStatus } from "./orderDeliveryStatus";
 import type { OrderStatus } from "./orderStatus";
 
 export interface Order {
@@ -14,5 +15,14 @@ export interface Order {
   total: number;
   currency: string;
   status: OrderStatus;
+  deliveryStatus?: OrderDeliveryStatus;
+  /** @nullable */
+  deliveryDeadline?: Date | null;
+  paymentStatus?: string;
+  /** @nullable */
+  disputeReason?: string | null;
+  /** @nullable */
+  resolution?: string | null;
+  refundedAmount?: number;
   createdAt: Date;
 }

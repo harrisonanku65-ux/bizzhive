@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useInitializePayment, verifyPayment, verifyFlutterwavePayment } from "@workspace/api-client-react";
 import { CreditCard, Smartphone, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { loadPaystack, loadFlutterwave } from "@/lib/paymentScripts";
 
 declare global {
   interface Window {
@@ -69,11 +70,20 @@ export function CheckoutModal({ open, onOpenChange, total, onSuccess }: Checkout
     }
   }
 
-  const handlePay = () => {
+  const handlePay = async () => {
     if (!email) { setErrorMsg("Email is required"); return; }
     if (method === "mobile_money" && !phone) { setErrorMsg("Phone number is required for mobile money"); return; }
     setErrorMsg("");
     setStep("processing");
+
+    // Fetch the provider SDK now rather than on every page load. If it fails
+    // to load we carry on — the branches below fall back to the provider's
+    // hosted redirect page, or to demo verification when no keys are set.
+    if (provider === "paystack") {
+      await loadPaystack();
+    } else if (provider === "flutterwave") {
+      await loadFlutterwave();
+    }
 
     initPayment.mutate({
       data: {
@@ -105,8 +115,11 @@ export function CheckoutModal({ open, onOpenChange, total, onSuccess }: Checkout
             window.open(data.paymentUrl, "_blank");
             setStep("details");
           } else {
-            setStep("success");
-            setTimeout(() => { onSuccess(); onOpenChange(false); }, 2000);
+            // No Paystack keys configured (local/demo). Previously this showed
+            // "success" without ever calling verify, so the order stayed
+            // unpaid and never entered escrow. Verify explicitly instead —
+            // the endpoint has a demo branch that marks the order paid.
+            handleVerifyPaystack(data.reference);
           }
         } else if (provider === "flutterwave") {
           if (window.FlutterwaveCheckout && data.flutterwavePublicKey) {
@@ -127,8 +140,9 @@ export function CheckoutModal({ open, onOpenChange, total, onSuccess }: Checkout
             window.open(data.paymentUrl, "_blank");
             setStep("details");
           } else {
-            setStep("success");
-            setTimeout(() => { onSuccess(); onOpenChange(false); }, 2000);
+            // Same demo path as Paystack above — verify so the order is
+            // actually marked paid rather than only looking successful.
+            handleVerifyFlutterwave("demo-transaction", data.reference);
           }
         }
       },

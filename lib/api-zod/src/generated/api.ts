@@ -10,13 +10,18 @@ import * as zod from "zod";
 /**
  * @summary Register a new buyer or seller account
  */
-export const registerBodyPasswordMin = 6;
+export const registerBodyPasswordMin = 8;
 
 export const registerBodyRoleDefault = `buyer`;
 
 export const RegisterBody = zod.object({
   email: zod.string().email(),
-  password: zod.string().min(registerBodyPasswordMin),
+  password: zod
+    .string()
+    .min(registerBodyPasswordMin)
+    .describe(
+      "At least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol. Must not be a common password or contain the user's own name or email.",
+    ),
   firstName: zod.string(),
   lastName: zod.string(),
   displayName: zod.string().optional(),
@@ -63,6 +68,18 @@ export const GetMeResponse = zod.object({
 });
 
 /**
+ * @summary Delete or anonymize the current user's account
+ */
+export const DeleteAccountBody = zod.object({
+  password: zod.string(),
+});
+
+export const DeleteAccountResponse = zod.object({
+  status: zod.enum(["deleted", "anonymized"]),
+  message: zod.string().optional(),
+});
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -102,6 +119,9 @@ export const ListVendorsResponseItem = zod.object({
   totalCourses: zod.number(),
   totalProducts: zod.number(),
   featured: zod.boolean(),
+  plan: zod.enum(["free", "pro", "premium"]),
+  planExpiresAt: zod.coerce.date().nullish(),
+  verifiedSeller: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 export const ListVendorsResponse = zod.array(ListVendorsResponseItem);
@@ -135,7 +155,31 @@ export const GetVendorResponse = zod.object({
   totalCourses: zod.number(),
   totalProducts: zod.number(),
   featured: zod.boolean(),
+  plan: zod.enum(["free", "pro", "premium"]),
+  planExpiresAt: zod.coerce.date().nullish(),
+  verifiedSeller: zod.boolean(),
   createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Start a Pro or Premium subscription for a vendor
+ */
+export const SubscribeVendorParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const SubscribeVendorBody = zod.object({
+  email: zod.string().email(),
+  tier: zod.enum(["pro", "premium"]),
+});
+
+export const SubscribeVendorResponse = zod.object({
+  vendorId: zod.number(),
+  tier: zod.string(),
+  reference: zod.string(),
+  paymentUrl: zod.string(),
+  accessCode: zod.string().optional(),
+  paystackPublicKey: zod.string(),
 });
 
 /**
@@ -229,6 +273,7 @@ export const GetCourseResponse = zod.object({
       duration: zod.string().nullish(),
       sortOrder: zod.number(),
       isFree: zod.boolean(),
+      contentUrl: zod.string().nullish(),
       courseId: zod.number(),
     }),
   ),
@@ -299,6 +344,7 @@ export const CreateLessonBody = zod.object({
   duration: zod.string().optional(),
   sortOrder: zod.number(),
   isFree: zod.boolean().optional(),
+  contentUrl: zod.string().optional(),
 });
 
 /**
@@ -325,8 +371,17 @@ export const ListProductsResponseItem = zod.object({
   thumbnail: zod.string().nullish(),
   price: zod.number(),
   currency: zod.string(),
-  productType: zod.enum(["ebook", "template", "software", "asset", "other"]),
+  productType: zod.enum([
+    "ebook",
+    "template",
+    "software",
+    "asset",
+    "audio",
+    "other",
+  ]),
   fileUrl: zod.string().nullish(),
+  previewUrl: zod.string().nullish(),
+  licenseTerms: zod.string().nullish(),
   rating: zod.number(),
   reviewsCount: zod.number(),
   salesCount: zod.number(),
@@ -350,8 +405,23 @@ export const CreateProductBody = zod.object({
   thumbnail: zod.string().optional(),
   price: zod.number(),
   currency: zod.string().optional(),
-  productType: zod.enum(["ebook", "template", "software", "asset", "other"]),
+  productType: zod.enum([
+    "ebook",
+    "template",
+    "software",
+    "asset",
+    "audio",
+    "other",
+  ]),
   fileUrl: zod.string().optional(),
+  previewUrl: zod
+    .string()
+    .optional()
+    .describe("Streamable preview clip — used for audio\/beat listings."),
+  licenseTerms: zod
+    .string()
+    .optional()
+    .describe("Licensing terms the buyer agrees to (audio\/beat listings)."),
   vendorId: zod.number(),
   categoryId: zod.number(),
 });
@@ -371,8 +441,17 @@ export const GetProductResponse = zod.object({
   thumbnail: zod.string().nullish(),
   price: zod.number(),
   currency: zod.string(),
-  productType: zod.enum(["ebook", "template", "software", "asset", "other"]),
+  productType: zod.enum([
+    "ebook",
+    "template",
+    "software",
+    "asset",
+    "audio",
+    "other",
+  ]),
   fileUrl: zod.string().nullish(),
+  previewUrl: zod.string().nullish(),
+  licenseTerms: zod.string().nullish(),
   rating: zod.number(),
   reviewsCount: zod.number(),
   salesCount: zod.number(),
@@ -400,9 +479,17 @@ export const UpdateProductBody = zod.object({
   price: zod.number().optional(),
   currency: zod.string().optional(),
   productType: zod
-    .enum(["ebook", "template", "software", "asset", "other"])
+    .enum(["ebook", "template", "software", "asset", "audio", "other"])
     .optional(),
   fileUrl: zod.string().optional(),
+  previewUrl: zod
+    .string()
+    .optional()
+    .describe("Streamable preview clip — used for audio\/beat listings."),
+  licenseTerms: zod
+    .string()
+    .optional()
+    .describe("Licensing terms the buyer agrees to (audio\/beat listings)."),
   categoryId: zod.number().optional(),
   published: zod.boolean().optional(),
   featured: zod.boolean().optional(),
@@ -416,8 +503,17 @@ export const UpdateProductResponse = zod.object({
   thumbnail: zod.string().nullish(),
   price: zod.number(),
   currency: zod.string(),
-  productType: zod.enum(["ebook", "template", "software", "asset", "other"]),
+  productType: zod.enum([
+    "ebook",
+    "template",
+    "software",
+    "asset",
+    "audio",
+    "other",
+  ]),
   fileUrl: zod.string().nullish(),
+  previewUrl: zod.string().nullish(),
+  licenseTerms: zod.string().nullish(),
   rating: zod.number(),
   reviewsCount: zod.number(),
   salesCount: zod.number(),
@@ -450,6 +546,12 @@ export const ListCourseReviewsResponseItem = zod.object({
   rating: zod.number(),
   comment: zod.string().nullish(),
   userName: zod.string(),
+  targetType: zod.enum(["course", "product", "vendor"]).optional(),
+  courseId: zod.number().nullish(),
+  productId: zod.number().nullish(),
+  vendorId: zod.number().nullish(),
+  vendorResponse: zod.string().nullish(),
+  vendorRespondedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const ListCourseReviewsResponse = zod.array(
@@ -478,13 +580,16 @@ export const GetCartResponse = zod.object({
   items: zod.array(
     zod.object({
       id: zod.number(),
-      itemType: zod.enum(["course", "product"]),
+      itemType: zod.enum(["course", "product", "session"]),
       itemId: zod.number(),
       title: zod.string(),
       thumbnail: zod.string().nullish(),
       price: zod.number(),
       currency: zod.string(),
+      vendorId: zod.number().optional(),
       vendorName: zod.string(),
+      startsAt: zod.coerce.date().nullish(),
+      durationMinutes: zod.number().nullish(),
     }),
   ),
   total: zod.number(),
@@ -496,7 +601,7 @@ export const GetCartResponse = zod.object({
  * @summary Add item to cart
  */
 export const AddToCartBody = zod.object({
-  itemType: zod.enum(["course", "product"]),
+  itemType: zod.enum(["course", "product", "session"]),
   itemId: zod.number(),
 });
 
@@ -504,13 +609,16 @@ export const AddToCartResponse = zod.object({
   items: zod.array(
     zod.object({
       id: zod.number(),
-      itemType: zod.enum(["course", "product"]),
+      itemType: zod.enum(["course", "product", "session"]),
       itemId: zod.number(),
       title: zod.string(),
       thumbnail: zod.string().nullish(),
       price: zod.number(),
       currency: zod.string(),
+      vendorId: zod.number().optional(),
       vendorName: zod.string(),
+      startsAt: zod.coerce.date().nullish(),
+      durationMinutes: zod.number().nullish(),
     }),
   ),
   total: zod.number(),
@@ -529,13 +637,16 @@ export const RemoveFromCartResponse = zod.object({
   items: zod.array(
     zod.object({
       id: zod.number(),
-      itemType: zod.enum(["course", "product"]),
+      itemType: zod.enum(["course", "product", "session"]),
       itemId: zod.number(),
       title: zod.string(),
       thumbnail: zod.string().nullish(),
       price: zod.number(),
       currency: zod.string(),
+      vendorId: zod.number().optional(),
       vendorName: zod.string(),
+      startsAt: zod.coerce.date().nullish(),
+      durationMinutes: zod.number().nullish(),
     }),
   ),
   total: zod.number(),
@@ -551,21 +662,615 @@ export const ListOrdersResponseItem = zod.object({
   items: zod.array(
     zod.object({
       id: zod.number(),
-      itemType: zod.enum(["course", "product"]),
+      itemType: zod.enum(["course", "product", "session"]),
       itemId: zod.number(),
       title: zod.string(),
       thumbnail: zod.string().nullish(),
       price: zod.number(),
       currency: zod.string(),
+      vendorId: zod.number().optional(),
       vendorName: zod.string(),
+      startsAt: zod.coerce.date().nullish(),
+      durationMinutes: zod.number().nullish(),
     }),
   ),
   total: zod.number(),
   currency: zod.string(),
-  status: zod.enum(["pending", "completed", "cancelled"]),
+  status: zod.enum(["pending", "completed", "cancelled", "refunded"]),
+  deliveryStatus: zod
+    .enum([
+      "awaiting_confirmation",
+      "confirmed",
+      "disputed",
+      "auto_released",
+      "resolved",
+    ])
+    .optional(),
+  deliveryDeadline: zod.coerce.date().nullish(),
+  paymentStatus: zod.string().optional(),
+  disputeReason: zod.string().nullish(),
+  resolution: zod.string().nullish(),
+  refundedAmount: zod.number().optional(),
   createdAt: zod.coerce.date(),
 });
 export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
+
+/**
+ * @summary Buyer confirms delivery, releasing the escrowed payment
+ */
+export const ConfirmDeliveryParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ConfirmDeliveryResponse = zod.object({
+  status: zod.string(),
+  payout: zod.record(zod.string(), zod.unknown()).nullish(),
+});
+
+/**
+ * @summary Buyer raises a dispute instead of confirming delivery
+ */
+export const ReportOrderIssueParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ReportOrderIssueBody = zod.object({
+  reason: zod.string(),
+});
+
+export const ReportOrderIssueResponse = zod.object({
+  status: zod.string(),
+});
+
+/**
+ * @summary List upcoming bookable session slots
+ */
+export const ListSessionSlotsQueryParams = zod.object({
+  vendorId: zod.coerce.number().optional(),
+  categoryId: zod.coerce.number().optional(),
+});
+
+export const ListSessionSlotsResponseItem = zod.object({
+  id: zod.number(),
+  vendorId: zod.number(),
+  vendorName: zod.string().optional(),
+  categoryId: zod.number(),
+  categoryName: zod.string().optional(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  startsAt: zod.coerce.date(),
+  durationMinutes: zod.number(),
+  price: zod.number(),
+  currency: zod.string(),
+  status: zod.enum(["available", "booked", "completed", "cancelled"]),
+  published: zod.boolean(),
+  meetingUrl: zod.string().nullish(),
+  meetingNotes: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListSessionSlotsResponse = zod.array(ListSessionSlotsResponseItem);
+
+/**
+ * @summary Publish a bookable session slot
+ */
+export const createSessionSlotBodyDurationMinutesDefault = 60;
+
+export const CreateSessionSlotBody = zod.object({
+  vendorId: zod.number(),
+  categoryId: zod.number(),
+  title: zod.string(),
+  description: zod.string().optional(),
+  startsAt: zod.coerce.date(),
+  durationMinutes: zod
+    .number()
+    .default(createSessionSlotBodyDurationMinutesDefault),
+  price: zod.number(),
+  meetingUrl: zod.string().optional(),
+  meetingNotes: zod.string().optional(),
+});
+
+/**
+ * @summary Update an unbooked session slot
+ */
+export const UpdateSessionSlotParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateSessionSlotBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  startsAt: zod.coerce.date().optional(),
+  durationMinutes: zod.number().optional(),
+  price: zod.number().optional(),
+  meetingUrl: zod.string().optional(),
+  meetingNotes: zod.string().optional(),
+  published: zod.boolean().optional(),
+});
+
+export const UpdateSessionSlotResponse = zod.object({
+  id: zod.number(),
+  vendorId: zod.number(),
+  vendorName: zod.string().optional(),
+  categoryId: zod.number(),
+  categoryName: zod.string().optional(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  startsAt: zod.coerce.date(),
+  durationMinutes: zod.number(),
+  price: zod.number(),
+  currency: zod.string(),
+  status: zod.enum(["available", "booked", "completed", "cancelled"]),
+  published: zod.boolean(),
+  meetingUrl: zod.string().nullish(),
+  meetingNotes: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete an unbooked session slot
+ */
+export const DeleteSessionSlotParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteSessionSlotResponse = zod.object({
+  id: zod.number(),
+  deleted: zod.boolean(),
+});
+
+/**
+ * @summary Cancel a session slot
+ */
+export const CancelSessionSlotParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CancelSessionSlotResponse = zod.object({
+  id: zod.number(),
+  status: zod.string(),
+});
+
+/**
+ * @summary Mark a booked session as delivered
+ */
+export const CompleteSessionSlotParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CompleteSessionSlotResponse = zod.object({
+  id: zod.number(),
+  status: zod.string(),
+});
+
+/**
+ * @summary List all of a vendor's session slots, including booked ones
+ */
+export const ListVendorSessionSlotsParams = zod.object({
+  vendorId: zod.coerce.number(),
+});
+
+export const ListVendorSessionSlotsResponseItem = zod.object({
+  id: zod.number(),
+  vendorId: zod.number(),
+  vendorName: zod.string().optional(),
+  categoryId: zod.number(),
+  categoryName: zod.string().optional(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  startsAt: zod.coerce.date(),
+  durationMinutes: zod.number(),
+  price: zod.number(),
+  currency: zod.string(),
+  status: zod.enum(["available", "booked", "completed", "cancelled"]),
+  published: zod.boolean(),
+  meetingUrl: zod.string().nullish(),
+  meetingNotes: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListVendorSessionSlotsResponse = zod.array(
+  ListVendorSessionSlotsResponseItem,
+);
+
+/**
+ * @summary List sessions the current visitor has booked
+ */
+export const ListMyBookingsResponseItem = zod.object({
+  id: zod.number(),
+  vendorId: zod.number(),
+  vendorName: zod.string().optional(),
+  categoryId: zod.number(),
+  categoryName: zod.string().optional(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  startsAt: zod.coerce.date(),
+  durationMinutes: zod.number(),
+  price: zod.number(),
+  currency: zod.string(),
+  status: zod.enum(["available", "booked", "completed", "cancelled"]),
+  published: zod.boolean(),
+  meetingUrl: zod.string().nullish(),
+  meetingNotes: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListMyBookingsResponse = zod.array(ListMyBookingsResponseItem);
+
+/**
+ * @summary List reviews for a product
+ */
+export const ListProductReviewsParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListProductReviewsResponseItem = zod.object({
+  id: zod.number(),
+  rating: zod.number(),
+  comment: zod.string().nullish(),
+  userName: zod.string(),
+  targetType: zod.enum(["course", "product", "vendor"]).optional(),
+  courseId: zod.number().nullish(),
+  productId: zod.number().nullish(),
+  vendorId: zod.number().nullish(),
+  vendorResponse: zod.string().nullish(),
+  vendorRespondedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListProductReviewsResponse = zod.array(
+  ListProductReviewsResponseItem,
+);
+
+/**
+ * @summary Add a review for a product
+ */
+export const CreateProductReviewParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const createProductReviewBodyRatingMax = 5;
+
+export const CreateProductReviewBody = zod.object({
+  rating: zod.number().min(1).max(createProductReviewBodyRatingMax),
+  comment: zod.string().optional(),
+  userName: zod.string(),
+});
+
+/**
+ * @summary List reviews for a vendor
+ */
+export const ListVendorReviewsParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListVendorReviewsResponseItem = zod.object({
+  id: zod.number(),
+  rating: zod.number(),
+  comment: zod.string().nullish(),
+  userName: zod.string(),
+  targetType: zod.enum(["course", "product", "vendor"]).optional(),
+  courseId: zod.number().nullish(),
+  productId: zod.number().nullish(),
+  vendorId: zod.number().nullish(),
+  vendorResponse: zod.string().nullish(),
+  vendorRespondedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListVendorReviewsResponse = zod.array(
+  ListVendorReviewsResponseItem,
+);
+
+/**
+ * @summary Add a review for a vendor
+ */
+export const CreateVendorReviewParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const createVendorReviewBodyRatingMax = 5;
+
+export const CreateVendorReviewBody = zod.object({
+  rating: zod.number().min(1).max(createVendorReviewBodyRatingMax),
+  comment: zod.string().optional(),
+  userName: zod.string(),
+});
+
+/**
+ * @summary Every review across a vendor's listings and profile
+ */
+export const ListAllVendorReviewsParams = zod.object({
+  vendorId: zod.coerce.number(),
+});
+
+export const ListAllVendorReviewsResponseItem = zod
+  .object({
+    id: zod.number(),
+    rating: zod.number(),
+    comment: zod.string().nullish(),
+    userName: zod.string(),
+    targetType: zod.enum(["course", "product", "vendor"]),
+    courseId: zod.number().nullish(),
+    productId: zod.number().nullish(),
+    vendorId: zod.number().nullish(),
+    vendorResponse: zod.string().nullish(),
+    vendorRespondedAt: zod.coerce.date().nullish(),
+    itemTitle: zod.string(),
+    createdAt: zod.coerce.date(),
+  })
+  .describe("A review plus the title of whatever it was left on.");
+export const ListAllVendorReviewsResponse = zod.array(
+  ListAllVendorReviewsResponseItem,
+);
+
+/**
+ * @summary Seller responds publicly to a review
+ */
+export const RespondToReviewParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const RespondToReviewBody = zod.object({
+  response: zod.string(),
+});
+
+export const RespondToReviewResponse = zod.object({
+  id: zod.number(),
+  rating: zod.number(),
+  comment: zod.string().nullish(),
+  userName: zod.string(),
+  targetType: zod.enum(["course", "product", "vendor"]).optional(),
+  courseId: zod.number().nullish(),
+  productId: zod.number().nullish(),
+  vendorId: zod.number().nullish(),
+  vendorResponse: zod.string().nullish(),
+  vendorRespondedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Raise a support request
+ */
+export const createSupportTicketBodyMessageMin = 10;
+
+export const CreateSupportTicketBody = zod.object({
+  name: zod.string(),
+  email: zod.string().email(),
+  subject: zod.string().optional(),
+  message: zod.string().min(createSupportTicketBodyMessageMin),
+  requesterRole: zod.enum(["buyer", "seller", "other"]).optional(),
+});
+
+/**
+ * @summary Support priority band for the current account
+ */
+export const GetSupportPriorityResponse = zod.object({
+  priority: zod.enum(["priority", "standard", "normal"]),
+  plan: zod.string().nullish(),
+});
+
+/**
+ * @summary Plan-gated vendor analytics
+ */
+export const GetVendorAnalyticsParams = zod.object({
+  vendorId: zod.coerce.number(),
+});
+
+export const GetVendorAnalyticsResponse = zod.object({
+  vendorId: zod.number(),
+  plan: zod.enum(["free", "pro", "premium"]),
+  tier: zod.enum(["basic", "standard", "advanced"]),
+  locked: zod.boolean(),
+  currency: zod.string(),
+  upgradeMessage: zod.string().optional(),
+  summary: zod.object({
+    totalRevenue: zod.number(),
+    unitsSold: zod.number(),
+    orderCount: zod.number(),
+  }),
+  revenueTrend: zod.array(
+    zod.object({
+      month: zod.string().describe("YYYY-MM"),
+      revenue: zod.number(),
+      units: zod.number(),
+    }),
+  ),
+  topListings: zod.array(
+    zod.object({
+      title: zod.string(),
+      itemType: zod.string().nullish(),
+      revenue: zod.number(),
+      units: zod.number(),
+    }),
+  ),
+  advanced: zod
+    .object({
+      uniqueBuyers: zod.number(),
+      repeatBuyers: zod.number(),
+      repeatBuyerRate: zod.number(),
+      averageOrderValue: zod.number(),
+      fundsHeldInEscrow: zod.number(),
+      payoutPercentage: zod.number().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Admin login (separate from buyer/seller auth)
+ */
+export const AdminLoginBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string(),
+});
+
+export const AdminLoginResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  name: zod.string(),
+});
+
+/**
+ * @summary Current admin
+ */
+export const GetAdminMeResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  name: zod.string(),
+});
+
+/**
+ * @summary Queue counters for the admin console
+ */
+export const GetAdminOverviewResponse = zod.object({
+  openDisputes: zod.number(),
+  awaitingConfirmation: zod.number(),
+  openTickets: zod.number(),
+  priorityTickets: zod.number(),
+  fundsHeldInEscrow: zod.number(),
+});
+
+/**
+ * @summary List disputed orders
+ */
+export const ListDisputesQueryParams = zod.object({
+  status: zod.enum(["open", "resolved", "all"]).optional(),
+});
+
+export const ListDisputesResponseItem = zod.object({
+  id: zod.number(),
+  total: zod.number(),
+  currency: zod.string(),
+  status: zod.string(),
+  paymentStatus: zod.string(),
+  paymentProvider: zod.string().nullish(),
+  paymentReference: zod.string().nullish(),
+  deliveryStatus: zod.string(),
+  disputeReason: zod.string().nullish(),
+  disputeRaisedAt: zod.coerce.date().nullish(),
+  payoutStatus: zod.string(),
+  refundedAmount: zod.number(),
+  refundableAmount: zod.number(),
+  resolution: zod.string().nullish(),
+  resolutionNotes: zod.string().nullish(),
+  resolvedAt: zod.coerce.date().nullish(),
+  buyerEmail: zod.string().nullish(),
+  buyerName: zod.string().nullish(),
+  vendorNames: zod.array(zod.string()),
+  items: zod.array(
+    zod.object({
+      title: zod.string(),
+      price: zod.number(),
+      itemType: zod.string().optional(),
+      vendorName: zod.string().nullish(),
+    }),
+  ),
+  createdAt: zod.coerce.date(),
+});
+export const ListDisputesResponse = zod.array(ListDisputesResponseItem);
+
+/**
+ * @summary Get a single disputed order
+ */
+export const GetDisputeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetDisputeResponse = zod.object({
+  id: zod.number(),
+  total: zod.number(),
+  currency: zod.string(),
+  status: zod.string(),
+  paymentStatus: zod.string(),
+  paymentProvider: zod.string().nullish(),
+  paymentReference: zod.string().nullish(),
+  deliveryStatus: zod.string(),
+  disputeReason: zod.string().nullish(),
+  disputeRaisedAt: zod.coerce.date().nullish(),
+  payoutStatus: zod.string(),
+  refundedAmount: zod.number(),
+  refundableAmount: zod.number(),
+  resolution: zod.string().nullish(),
+  resolutionNotes: zod.string().nullish(),
+  resolvedAt: zod.coerce.date().nullish(),
+  buyerEmail: zod.string().nullish(),
+  buyerName: zod.string().nullish(),
+  vendorNames: zod.array(zod.string()),
+  items: zod.array(
+    zod.object({
+      title: zod.string(),
+      price: zod.number(),
+      itemType: zod.string().optional(),
+      vendorName: zod.string().nullish(),
+    }),
+  ),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Resolve a dispute by releasing funds or refunding the buyer
+ */
+export const ResolveDisputeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ResolveDisputeBody = zod.object({
+  resolution: zod.enum(["released", "refunded_full", "refunded_partial"]),
+  amount: zod
+    .number()
+    .optional()
+    .describe(
+      "Required for refunded_partial; must be less than the refundable total.",
+    ),
+  notes: zod.string().optional(),
+});
+
+export const ResolveDisputeResponse = zod.object({
+  orderId: zod.number(),
+  resolution: zod.string(),
+  refundedAmount: zod.number(),
+  refund: zod.record(zod.string(), zod.unknown()).nullish(),
+  payout: zod.record(zod.string(), zod.unknown()).nullish(),
+  resolvedBy: zod.string().optional(),
+});
+
+/**
+ * @summary Support queue, Premium vendors first
+ */
+export const ListSupportTicketsQueryParams = zod.object({
+  status: zod.enum(["open", "closed", "all"]).optional(),
+});
+
+export const ListSupportTicketsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  email: zod.string(),
+  subject: zod.string(),
+  message: zod.string(),
+  requesterRole: zod.string().optional(),
+  userId: zod.number().nullish(),
+  vendorId: zod.number().nullish(),
+  vendorPlan: zod.string().nullish(),
+  priority: zod.enum(["priority", "standard", "normal"]),
+  status: zod.enum(["open", "closed"]),
+  adminNotes: zod.string().nullish(),
+  closedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListSupportTicketsResponse = zod.array(
+  ListSupportTicketsResponseItem,
+);
+
+/**
+ * @summary Close a support ticket
+ */
+export const CloseSupportTicketParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CloseSupportTicketBody = zod.object({
+  adminNotes: zod.string().optional(),
+});
+
+export const CloseSupportTicketResponse = zod.object({
+  id: zod.number(),
+  status: zod.string(),
+});
 
 /**
  * @summary Initialize a payment with Paystack or Flutterwave
@@ -734,9 +1439,12 @@ export const GetFeaturedContentResponse = zod.object({
         "template",
         "software",
         "asset",
+        "audio",
         "other",
       ]),
       fileUrl: zod.string().nullish(),
+      previewUrl: zod.string().nullish(),
+      licenseTerms: zod.string().nullish(),
       rating: zod.number(),
       reviewsCount: zod.number(),
       salesCount: zod.number(),
@@ -763,6 +1471,9 @@ export const GetFeaturedContentResponse = zod.object({
       totalCourses: zod.number(),
       totalProducts: zod.number(),
       featured: zod.boolean(),
+      plan: zod.enum(["free", "pro", "premium"]),
+      planExpiresAt: zod.coerce.date().nullish(),
+      verifiedSeller: zod.boolean(),
       createdAt: zod.coerce.date(),
     }),
   ),
@@ -803,6 +1514,9 @@ export const GetTopVendorsResponseItem = zod.object({
   totalCourses: zod.number(),
   totalProducts: zod.number(),
   featured: zod.boolean(),
+  plan: zod.enum(["free", "pro", "premium"]),
+  planExpiresAt: zod.coerce.date().nullish(),
+  verifiedSeller: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 export const GetTopVendorsResponse = zod.array(GetTopVendorsResponseItem);

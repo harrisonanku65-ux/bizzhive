@@ -5,6 +5,7 @@
  * BizzHive Marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { VendorPlan } from "./vendorPlan";
 
 export interface Vendor {
   id: number;
@@ -21,5 +22,9 @@ export interface Vendor {
   totalCourses: number;
   totalProducts: number;
   featured: boolean;
+  plan: VendorPlan;
+  /** @nullable */
+  planExpiresAt?: Date | null;
+  verifiedSeller: boolean;
   createdAt: Date;
 }

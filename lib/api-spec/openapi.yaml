@@ -30,6 +30,14 @@ tags:
     description: Vendor payout management
   - name: auth
     description: Buyer and seller authentication
+  - name: sessions
+    description: Bookable one-on-one session slots (coaching, consultations)
+  - name: reviews
+    description: Course, product and vendor reviews
+  - name: support
+    description: Support requests
+  - name: admin
+    description: Admin console — dispute resolution and support queue
 
 paths:
   /auth/register:
@@ -99,6 +107,27 @@ paths:
       responses:
         "200":
           description: Logged out
+
+  /auth/delete-account:
+    post:
+      operationId: deleteAccount
+      tags: [auth]
+      summary: Delete or anonymize the current user's account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteAccountBody"
+      responses:
+        "200":
+          description: Account deleted or anonymized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteAccountResponse"
+        "401":
+          description: Not authenticated or incorrect password
 
   /healthz:
     get:
@@ -183,6 +212,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Vendor"
+        "404":
+          description: Vendor not found
+
+  /vendors/{id}/subscribe:
+    post:
+      operationId: subscribeVendor
+      tags: [vendors]
+      summary: Start a Pro or Premium subscription for a vendor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscribeVendorBody"
+      responses:
+        "200":
+          description: Subscription initialized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscribeVendorResponse"
+        "400":
+          description: Validation error
         "404":
           description: Vendor not found
 
@@ -564,6 +622,603 @@ paths:
               schema:
                 $ref: "#/components/schemas/Order"
 
+  /orders/{id}/confirm-delivery:
+    post:
+      operationId: confirmDelivery
+      tags: [orders]
+      summary: Buyer confirms delivery, releasing the escrowed payment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Delivery confirmed and payout released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfirmDeliveryResponse"
+        "400":
+          description: Order is not awaiting confirmation
+        "404":
+          description: Order not found
+
+  /orders/{id}/report-issue:
+    post:
+      operationId: reportOrderIssue
+      tags: [orders]
+      summary: Buyer raises a dispute instead of confirming delivery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportIssueBody"
+      responses:
+        "200":
+          description: Dispute raised
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportIssueResponse"
+        "400":
+          description: Order is not awaiting confirmation
+        "404":
+          description: Order not found
+
+  /session-slots:
+    get:
+      operationId: listSessionSlots
+      tags: [sessions]
+      summary: List upcoming bookable session slots
+      parameters:
+        - name: vendorId
+          in: query
+          schema:
+            type: integer
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Available session slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionSlot"
+    post:
+      operationId: createSessionSlot
+      tags: [sessions]
+      summary: Publish a bookable session slot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionSlotBody"
+      responses:
+        "201":
+          description: Slot published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionSlot"
+        "400":
+          description: Validation error
+        "401":
+          description: Not authenticated
+        "403":
+          description: Plan listing limit reached
+
+  /session-slots/{id}:
+    put:
+      operationId: updateSessionSlot
+      tags: [sessions]
+      summary: Update an unbooked session slot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSessionSlotBody"
+      responses:
+        "200":
+          description: Slot updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionSlot"
+        "400":
+          description: Slot is booked or payload invalid
+        "404":
+          description: Slot not found
+    delete:
+      operationId: deleteSessionSlot
+      tags: [sessions]
+      summary: Delete an unbooked session slot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Slot deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteSessionSlotResponse"
+        "400":
+          description: Slot is booked
+        "404":
+          description: Slot not found
+
+  /session-slots/{id}/cancel:
+    post:
+      operationId: cancelSessionSlot
+      tags: [sessions]
+      summary: Cancel a session slot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Slot cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionSlotStatusResponse"
+
+  /session-slots/{id}/complete:
+    post:
+      operationId: completeSessionSlot
+      tags: [sessions]
+      summary: Mark a booked session as delivered
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Slot marked complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionSlotStatusResponse"
+
+  /vendors/{vendorId}/session-slots:
+    get:
+      operationId: listVendorSessionSlots
+      tags: [sessions]
+      summary: List all of a vendor's session slots, including booked ones
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vendor session slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionSlot"
+
+  /my-bookings:
+    get:
+      operationId: listMyBookings
+      tags: [sessions]
+      summary: List sessions the current visitor has booked
+      responses:
+        "200":
+          description: Booked sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionSlot"
+
+  /products/{id}/reviews:
+    get:
+      operationId: listProductReviews
+      tags: [reviews]
+      summary: List reviews for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: createProductReview
+      tags: [reviews]
+      summary: Add a review for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewBody"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "409":
+          description: Already reviewed by this account
+
+  /vendors/{id}/reviews:
+    get:
+      operationId: listVendorReviews
+      tags: [reviews]
+      summary: List reviews for a vendor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: createVendorReview
+      tags: [reviews]
+      summary: Add a review for a vendor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewBody"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "409":
+          description: Already reviewed by this account
+
+  /vendors/{vendorId}/all-reviews:
+    get:
+      operationId: listAllVendorReviews
+      tags: [reviews]
+      summary: Every review across a vendor's listings and profile
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reviews with the reviewed item's title
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ManagedReview"
+
+  /reviews/{id}/respond:
+    post:
+      operationId: respondToReview
+      tags: [reviews]
+      summary: Seller responds publicly to a review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RespondToReviewBody"
+      responses:
+        "200":
+          description: Response saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "403":
+          description: Not your listing
+
+  /support/tickets:
+    post:
+      operationId: createSupportTicket
+      tags: [support]
+      summary: Raise a support request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSupportTicketBody"
+      responses:
+        "201":
+          description: Ticket created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportTicketCreated"
+        "400":
+          description: Validation error
+
+  /support/my-priority:
+    get:
+      operationId: getSupportPriority
+      tags: [support]
+      summary: Support priority band for the current account
+      responses:
+        "200":
+          description: Priority band
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportPriority"
+
+  /dashboard/vendor/{vendorId}/analytics:
+    get:
+      operationId: getVendorAnalytics
+      tags: [dashboard]
+      summary: Plan-gated vendor analytics
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Analytics for the vendor's plan tier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorAnalytics"
+        "404":
+          description: Vendor not found
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login (separate from buyer/seller auth)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Invalid credentials
+
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Current admin
+      responses:
+        "200":
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Not authenticated
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+
+  /admin/overview:
+    get:
+      operationId: getAdminOverview
+      tags: [admin]
+      summary: Queue counters for the admin console
+      responses:
+        "200":
+          description: Counters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOverview"
+        "401":
+          description: Not authenticated
+
+  /admin/disputes:
+    get:
+      operationId: listDisputes
+      tags: [admin]
+      summary: List disputed orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, resolved, all]
+      responses:
+        "200":
+          description: Disputed orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DisputeOrder"
+        "401":
+          description: Not authenticated
+
+  /admin/disputes/{id}:
+    get:
+      operationId: getDispute
+      tags: [admin]
+      summary: Get a single disputed order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Disputed order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DisputeOrder"
+        "404":
+          description: Order not found
+
+  /admin/disputes/{id}/resolve:
+    post:
+      operationId: resolveDispute
+      tags: [admin]
+      summary: Resolve a dispute by releasing funds or refunding the buyer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResolveDisputeBody"
+      responses:
+        "200":
+          description: Dispute resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResolveDisputeResponse"
+        "400":
+          description: Invalid resolution or order not under dispute
+        "502":
+          description: Refund could not be processed
+
+  /admin/support-tickets:
+    get:
+      operationId: listSupportTickets
+      tags: [admin]
+      summary: Support queue, Premium vendors first
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, all]
+      responses:
+        "200":
+          description: Support tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SupportTicket"
+
+  /admin/support-tickets/{id}/close:
+    post:
+      operationId: closeSupportTicket
+      tags: [admin]
+      summary: Close a support ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloseSupportTicketBody"
+      responses:
+        "200":
+          description: Ticket closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloseSupportTicketResponse"
+
   /payments/initialize:
     post:
       operationId: initializePayment
@@ -783,7 +1438,11 @@ components:
           format: email
         password:
           type: string
-          minLength: 6
+          minLength: 8
+          description: >-
+            At least 8 characters with an uppercase letter, a lowercase letter,
+            a number and a symbol. Must not be a common password or contain the
+            user's own name or email.
         firstName:
           type: string
         lastName:
@@ -838,6 +1497,23 @@ components:
           type: ["string", "null"]
       required: [id, email, role]
 
+    DeleteAccountBody:
+      type: object
+      properties:
+        password:
+          type: string
+      required: [password]
+
+    DeleteAccountResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [deleted, anonymized]
+        message:
+          type: string
+      required: [status]
+
     HealthStatus:
       type: object
       properties:
@@ -891,10 +1567,31 @@ components:
           type: integer
         featured:
           type: boolean
+        plan:
+          type: string
+          enum: [free, pro, premium]
+        planExpiresAt:
+          type: ["string", "null"]
+          format: date-time
+        verifiedSeller:
+          type: boolean
         createdAt:
           type: string
           format: date-time
-      required: [id, name, slug, rating, totalSales, totalCourses, totalProducts, featured, createdAt]
+      required:
+        [
+          id,
+          name,
+          slug,
+          rating,
+          totalSales,
+          totalCourses,
+          totalProducts,
+          featured,
+          plan,
+          verifiedSeller,
+          createdAt,
+        ]
 
     CreateVendorBody:
       type: object
@@ -958,7 +1655,26 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, title, slug, price, currency, level, lessonsCount, rating, reviewsCount, enrollments, featured, published, vendorId, vendorName, categoryId, categoryName, createdAt]
+      required:
+        [
+          id,
+          title,
+          slug,
+          price,
+          currency,
+          level,
+          lessonsCount,
+          rating,
+          reviewsCount,
+          enrollments,
+          featured,
+          published,
+          vendorId,
+          vendorName,
+          categoryId,
+          categoryName,
+          createdAt,
+        ]
 
     CourseDetail:
       type: object
@@ -1015,7 +1731,27 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, title, slug, price, currency, level, lessonsCount, rating, reviewsCount, enrollments, featured, published, vendorId, vendorName, categoryId, categoryName, lessons, createdAt]
+      required:
+        [
+          id,
+          title,
+          slug,
+          price,
+          currency,
+          level,
+          lessonsCount,
+          rating,
+          reviewsCount,
+          enrollments,
+          featured,
+          published,
+          vendorId,
+          vendorName,
+          categoryId,
+          categoryName,
+          lessons,
+          createdAt,
+        ]
 
     CreateCourseBody:
       type: object
@@ -1081,6 +1817,8 @@ components:
           type: integer
         isFree:
           type: boolean
+        contentUrl:
+          type: ["string", "null"]
         courseId:
           type: integer
       required: [id, title, sortOrder, isFree, courseId]
@@ -1098,6 +1836,8 @@ components:
           type: integer
         isFree:
           type: boolean
+        contentUrl:
+          type: string
       required: [title, sortOrder]
 
     Product:
@@ -1120,8 +1860,12 @@ components:
           type: string
         productType:
           type: string
-          enum: [ebook, template, software, asset, other]
+          enum: [ebook, template, software, asset, audio, other]
         fileUrl:
+          type: ["string", "null"]
+        previewUrl:
+          type: ["string", "null"]
+        licenseTerms:
           type: ["string", "null"]
         rating:
           type: number
@@ -1147,7 +1891,25 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, title, slug, price, currency, productType, rating, reviewsCount, salesCount, featured, published, vendorId, vendorName, categoryId, categoryName, createdAt]
+      required:
+        [
+          id,
+          title,
+          slug,
+          price,
+          currency,
+          productType,
+          rating,
+          reviewsCount,
+          salesCount,
+          featured,
+          published,
+          vendorId,
+          vendorName,
+          categoryId,
+          categoryName,
+          createdAt,
+        ]
 
     CreateProductBody:
       type: object
@@ -1164,9 +1926,15 @@ components:
           type: string
         productType:
           type: string
-          enum: [ebook, template, software, asset, other]
+          enum: [ebook, template, software, asset, audio, other]
         fileUrl:
           type: string
+        previewUrl:
+          type: string
+          description: Streamable preview clip — used for audio/beat listings.
+        licenseTerms:
+          type: string
+          description: Licensing terms the buyer agrees to (audio/beat listings).
         vendorId:
           type: integer
         categoryId:
@@ -1188,9 +1956,15 @@ components:
           type: string
         productType:
           type: string
-          enum: [ebook, template, software, asset, other]
+          enum: [ebook, template, software, asset, audio, other]
         fileUrl:
           type: string
+        previewUrl:
+          type: string
+          description: Streamable preview clip — used for audio/beat listings.
+        licenseTerms:
+          type: string
+          description: Licensing terms the buyer agrees to (audio/beat listings).
         categoryId:
           type: integer
         published:
@@ -1209,10 +1983,64 @@ components:
           type: ["string", "null"]
         userName:
           type: string
+        targetType:
+          type: string
+          enum: [course, product, vendor]
+        courseId:
+          type: ["integer", "null"]
+        productId:
+          type: ["integer", "null"]
+        vendorId:
+          type: ["integer", "null"]
+        vendorResponse:
+          type: ["string", "null"]
+        vendorRespondedAt:
+          type: ["string", "null"]
+          format: date-time
         createdAt:
           type: string
           format: date-time
       required: [id, rating, userName, createdAt]
+
+    ManagedReview:
+      type: object
+      description: A review plus the title of whatever it was left on.
+      properties:
+        id:
+          type: integer
+        rating:
+          type: integer
+        comment:
+          type: ["string", "null"]
+        userName:
+          type: string
+        targetType:
+          type: string
+          enum: [course, product, vendor]
+        courseId:
+          type: ["integer", "null"]
+        productId:
+          type: ["integer", "null"]
+        vendorId:
+          type: ["integer", "null"]
+        vendorResponse:
+          type: ["string", "null"]
+        vendorRespondedAt:
+          type: ["string", "null"]
+          format: date-time
+        itemTitle:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, rating, userName, targetType, itemTitle, createdAt]
+
+    RespondToReviewBody:
+      type: object
+      properties:
+        response:
+          type: string
+      required: [response]
 
     CreateReviewBody:
       type: object
@@ -1234,7 +2062,7 @@ components:
           type: integer
         itemType:
           type: string
-          enum: [course, product]
+          enum: [course, product, session]
         itemId:
           type: integer
         title:
@@ -1246,8 +2074,16 @@ components:
           format: float
         currency:
           type: string
+        vendorId:
+          type: integer
         vendorName:
           type: string
+        # Present only for session line items.
+        startsAt:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
       required: [id, itemType, itemId, title, price, currency, vendorName]
 
     Cart:
@@ -1271,7 +2107,7 @@ components:
       properties:
         itemType:
           type: string
-          enum: [course, product]
+          enum: [course, product, session]
         itemId:
           type: integer
       required: [itemType, itemId]
@@ -1292,11 +2128,55 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, completed, cancelled]
+          enum: [pending, completed, cancelled, refunded]
+        # Escrow state — drives the confirm / report-issue controls on the
+        # buyer's orders page.
+        deliveryStatus:
+          type: string
+          enum: [awaiting_confirmation, confirmed, disputed, auto_released, resolved]
+        deliveryDeadline:
+          type: ["string", "null"]
+          format: date-time
+        paymentStatus:
+          type: string
+        disputeReason:
+          type: ["string", "null"]
+        # Left un-enumerated on purpose: a nullable enum makes Orval emit
+        # awkward union types. Values are released | refunded_full |
+        # refunded_partial.
+        resolution:
+          type: ["string", "null"]
+        refundedAmount:
+          type: number
+          format: float
         createdAt:
           type: string
           format: date-time
       required: [id, items, total, currency, status, createdAt]
+
+    ConfirmDeliveryResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        payout:
+          type: ["object", "null"]
+          additionalProperties: true
+      required: [status]
+
+    ReportIssueBody:
+      type: object
+      properties:
+        reason:
+          type: string
+      required: [reason]
+
+    ReportIssueResponse:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
 
     DashboardStats:
       type: object
@@ -1314,7 +2194,15 @@ components:
           format: float
         currency:
           type: string
-      required: [totalCourses, totalProducts, totalVendors, totalOrders, totalRevenue, currency]
+      required:
+        [
+          totalCourses,
+          totalProducts,
+          totalVendors,
+          totalOrders,
+          totalRevenue,
+          currency,
+        ]
 
     VendorStats:
       type: object
@@ -1335,7 +2223,16 @@ components:
           type: integer
         currency:
           type: string
-      required: [totalCourses, totalProducts, totalSales, totalRevenue, averageRating, totalEnrollments, currency]
+      required:
+        [
+          totalCourses,
+          totalProducts,
+          totalSales,
+          totalRevenue,
+          averageRating,
+          totalEnrollments,
+          currency,
+        ]
 
     FeaturedContent:
       type: object
@@ -1384,7 +2281,8 @@ components:
           type: integer
         totalItems:
           type: integer
-      required: [categoryId, categoryName, courseCount, productCount, totalItems]
+      required:
+        [categoryId, categoryName, courseCount, productCount, totalItems]
 
     PaymentInitializeBody:
       type: object
@@ -1480,6 +2378,34 @@ components:
           type: number
       required: [vendorId, payoutPercentage]
 
+    SubscribeVendorBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        tier:
+          type: string
+          enum: [pro, premium]
+      required: [email, tier]
+
+    SubscribeVendorResponse:
+      type: object
+      properties:
+        vendorId:
+          type: integer
+        tier:
+          type: string
+        reference:
+          type: string
+        paymentUrl:
+          type: string
+        accessCode:
+          type: string
+        paystackPublicKey:
+          type: string
+      required: [vendorId, tier, reference, paymentUrl, paystackPublicKey]
+
     PayoutResult:
       type: object
       properties:
@@ -1502,3 +2428,468 @@ components:
                 type: string
             required: [vendorId, vendorName, amount, status]
       required: [orderId, payouts]
+
+    # ------------------------------------------------------------------
+    # Bookable session slots
+    # ------------------------------------------------------------------
+
+    SessionSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+        vendorId:
+          type: integer
+        vendorName:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startsAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+        price:
+          type: number
+          format: float
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [available, booked, completed, cancelled]
+        published:
+          type: boolean
+        # Only returned to the buyer who paid, or the vendor who owns the slot.
+        meetingUrl:
+          type: ["string", "null"]
+        meetingNotes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        [id, vendorId, categoryId, title, startsAt, durationMinutes, price, currency, status, published, createdAt]
+
+    CreateSessionSlotBody:
+      type: object
+      properties:
+        vendorId:
+          type: integer
+        categoryId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+          default: 60
+        price:
+          type: number
+        meetingUrl:
+          type: string
+        meetingNotes:
+          type: string
+      required: [vendorId, categoryId, title, startsAt, price]
+
+    UpdateSessionSlotBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+        price:
+          type: number
+        meetingUrl:
+          type: string
+        meetingNotes:
+          type: string
+        published:
+          type: boolean
+
+    DeleteSessionSlotResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        deleted:
+          type: boolean
+      required: [id, deleted]
+
+    SessionSlotStatusResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+      required: [id, status]
+
+    # ------------------------------------------------------------------
+    # Support
+    # ------------------------------------------------------------------
+
+    CreateSupportTicketBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        subject:
+          type: string
+        message:
+          type: string
+          minLength: 10
+        requesterRole:
+          type: string
+          enum: [buyer, seller, other]
+      required: [name, email, message]
+
+    SupportTicketCreated:
+      type: object
+      properties:
+        id:
+          type: integer
+        priority:
+          type: string
+          enum: [priority, standard, normal]
+        status:
+          type: string
+        expectedResponse:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, priority, status, expectedResponse, createdAt]
+
+    SupportPriority:
+      type: object
+      properties:
+        priority:
+          type: string
+          enum: [priority, standard, normal]
+        plan:
+          type: ["string", "null"]
+      required: [priority]
+
+    SupportTicket:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+        requesterRole:
+          type: string
+        userId:
+          type: ["integer", "null"]
+        vendorId:
+          type: ["integer", "null"]
+        vendorPlan:
+          type: ["string", "null"]
+        priority:
+          type: string
+          enum: [priority, standard, normal]
+        status:
+          type: string
+          enum: [open, closed]
+        adminNotes:
+          type: ["string", "null"]
+        closedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, email, subject, message, priority, status, createdAt]
+
+    CloseSupportTicketBody:
+      type: object
+      properties:
+        adminNotes:
+          type: string
+
+    CloseSupportTicketResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+      required: [id, status]
+
+    # ------------------------------------------------------------------
+    # Vendor analytics (plan-gated)
+    # ------------------------------------------------------------------
+
+    RevenueTrendPoint:
+      type: object
+      properties:
+        month:
+          type: string
+          description: YYYY-MM
+        revenue:
+          type: number
+          format: float
+        units:
+          type: integer
+      required: [month, revenue, units]
+
+    TopListing:
+      type: object
+      properties:
+        title:
+          type: string
+        itemType:
+          type: ["string", "null"]
+        revenue:
+          type: number
+          format: float
+        units:
+          type: integer
+      required: [title, revenue, units]
+
+    AdvancedAnalytics:
+      type: object
+      properties:
+        uniqueBuyers:
+          type: integer
+        repeatBuyers:
+          type: integer
+        repeatBuyerRate:
+          type: number
+          format: float
+        averageOrderValue:
+          type: number
+          format: float
+        fundsHeldInEscrow:
+          type: number
+          format: float
+        payoutPercentage:
+          type: number
+          format: float
+      required: [uniqueBuyers, repeatBuyers, repeatBuyerRate, averageOrderValue, fundsHeldInEscrow]
+
+    VendorAnalytics:
+      type: object
+      properties:
+        vendorId:
+          type: integer
+        plan:
+          type: string
+          enum: [free, pro, premium]
+        tier:
+          type: string
+          enum: [basic, standard, advanced]
+        locked:
+          type: boolean
+        currency:
+          type: string
+        upgradeMessage:
+          type: string
+        summary:
+          type: object
+          properties:
+            totalRevenue:
+              type: number
+              format: float
+            unitsSold:
+              type: integer
+            orderCount:
+              type: integer
+          required: [totalRevenue, unitsSold, orderCount]
+        revenueTrend:
+          type: array
+          items:
+            $ref: "#/components/schemas/RevenueTrendPoint"
+        topListings:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopListing"
+        # Null on Free/Pro; populated on Premium.
+        advanced:
+          $ref: "#/components/schemas/AdvancedAnalytics"
+      required: [vendorId, plan, tier, locked, currency, summary, revenueTrend, topListings]
+
+    # ------------------------------------------------------------------
+    # Admin console
+    # ------------------------------------------------------------------
+
+    AdminLoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+      required: [id, email, name]
+
+    AdminOverview:
+      type: object
+      properties:
+        openDisputes:
+          type: integer
+        awaitingConfirmation:
+          type: integer
+        openTickets:
+          type: integer
+        priorityTickets:
+          type: integer
+        fundsHeldInEscrow:
+          type: number
+          format: float
+      required:
+        [openDisputes, awaitingConfirmation, openTickets, priorityTickets, fundsHeldInEscrow]
+
+    DisputeOrderItem:
+      type: object
+      properties:
+        title:
+          type: string
+        price:
+          type: number
+          format: float
+        itemType:
+          type: string
+        vendorName:
+          type: ["string", "null"]
+      required: [title, price]
+
+    DisputeOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        total:
+          type: number
+          format: float
+        currency:
+          type: string
+        status:
+          type: string
+        paymentStatus:
+          type: string
+        paymentProvider:
+          type: ["string", "null"]
+        paymentReference:
+          type: ["string", "null"]
+        deliveryStatus:
+          type: string
+        disputeReason:
+          type: ["string", "null"]
+        disputeRaisedAt:
+          type: ["string", "null"]
+          format: date-time
+        payoutStatus:
+          type: string
+        refundedAmount:
+          type: number
+          format: float
+        refundableAmount:
+          type: number
+          format: float
+        resolution:
+          type: ["string", "null"]
+        resolutionNotes:
+          type: ["string", "null"]
+        resolvedAt:
+          type: ["string", "null"]
+          format: date-time
+        buyerEmail:
+          type: ["string", "null"]
+        buyerName:
+          type: ["string", "null"]
+        vendorNames:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DisputeOrderItem"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        [
+          id,
+          total,
+          currency,
+          status,
+          paymentStatus,
+          deliveryStatus,
+          payoutStatus,
+          refundedAmount,
+          refundableAmount,
+          vendorNames,
+          items,
+          createdAt,
+        ]
+
+    ResolveDisputeBody:
+      type: object
+      properties:
+        resolution:
+          type: string
+          enum: [released, refunded_full, refunded_partial]
+        amount:
+          type: number
+          description: Required for refunded_partial; must be less than the refundable total.
+        notes:
+          type: string
+      required: [resolution]
+
+    ResolveDisputeResponse:
+      type: object
+      properties:
+        orderId:
+          type: integer
+        resolution:
+          type: string
+        refundedAmount:
+          type: number
+          format: float
+        refund:
+          type: ["object", "null"]
+          additionalProperties: true
+        payout:
+          type: ["object", "null"]
+          additionalProperties: true
+        resolvedBy:
+          type: string
+      required: [orderId, resolution, refundedAmount]

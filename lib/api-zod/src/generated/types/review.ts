@@ -5,6 +5,7 @@
  * BizzHive Marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { ReviewTargetType } from "./reviewTargetType";
 
 export interface Review {
   id: number;
@@ -12,5 +13,16 @@ export interface Review {
   /** @nullable */
   comment?: string | null;
   userName: string;
+  targetType?: ReviewTargetType;
+  /** @nullable */
+  courseId?: number | null;
+  /** @nullable */
+  productId?: number | null;
+  /** @nullable */
+  vendorId?: number | null;
+  /** @nullable */
+  vendorResponse?: string | null;
+  /** @nullable */
+  vendorRespondedAt?: Date | null;
   createdAt: Date;
 }

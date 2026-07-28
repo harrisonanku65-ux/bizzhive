@@ -16,5 +16,10 @@ export interface CartItem {
   thumbnail?: string | null;
   price: number;
   currency: string;
+  vendorId?: number;
   vendorName: string;
+  /** @nullable */
+  startsAt?: Date | null;
+  /** @nullable */
+  durationMinutes?: number | null;
 }

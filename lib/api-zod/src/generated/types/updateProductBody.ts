@@ -15,6 +15,10 @@ export interface UpdateProductBody {
   currency?: string;
   productType?: UpdateProductBodyProductType;
   fileUrl?: string;
+  /** Streamable preview clip — used for audio/beat listings. */
+  previewUrl?: string;
+  /** Licensing terms the buyer agrees to (audio/beat listings). */
+  licenseTerms?: string;
   categoryId?: number;
   published?: boolean;
   featured?: boolean;

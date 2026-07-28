@@ -9,6 +9,11 @@ import dashboardRouter from "./dashboard";
 import paymentsRouter from "./payments";
 import payoutsRouter from "./payouts";
 import authRouter from "./auth";
+import uploadsRouter from "./uploads";
+import adminRouter from "./admin";
+import sessionsRouter from "./sessions";
+import reviewsRouter from "./reviews";
+import supportRouter from "./support";
 
 const router: IRouter = Router();
 
@@ -22,5 +27,12 @@ router.use(cartRouter);
 router.use(dashboardRouter);
 router.use(paymentsRouter);
 router.use(payoutsRouter);
+router.use(uploadsRouter);
+// These add further /vendors/:id/* sub-paths. Express matches per path
+// segment, so /vendors/:id in vendorsRouter does not shadow them.
+router.use(sessionsRouter);
+router.use(reviewsRouter);
+router.use(supportRouter);
+router.use(adminRouter);
 
 export default router;

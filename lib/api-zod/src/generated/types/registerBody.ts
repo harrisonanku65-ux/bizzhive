@@ -9,7 +9,10 @@ import type { RegisterBodyRole } from "./registerBodyRole";
 
 export interface RegisterBody {
   email: string;
-  /** @minLength 6 */
+  /**
+   * At least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol. Must not be a common password or contain the user's own name or email.
+   * @minLength 8
+   */
   password: string;
   firstName: string;
   lastName: string;

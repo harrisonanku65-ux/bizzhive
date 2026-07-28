@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -10,7 +11,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login, isLoading } = useAuth();
+  const { login, isLoggingIn } = useAuth();
   const [, navigate] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +21,11 @@ export default function Login() {
       await login(email, password);
       navigate("/");
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Login failed. Please try again.");
+      // The generated client throws an ApiError with the parsed body on
+      // `.data` — there is no axios-style `.response.data`, so the previous
+      // lookup was always undefined and every failure showed the same
+      // generic message instead of "Invalid email or password".
+      setError(err?.data?.error ?? "Login failed. Please try again.");
     }
   };
 
@@ -52,19 +57,17 @@ export default function Login() {
                 className="w-full bg-muted rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Password</label>
-              <input
-                type="password"
-                required
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-muted rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-            <Button type="submit" className="w-full rounded-full" size="lg" disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
+            <PasswordInput
+              label="Password"
+              name="current-password"
+              autoComplete="current-password"
+              required
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button type="submit" className="w-full rounded-full" size="lg" disabled={isLoggingIn}>
+              {isLoggingIn ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
               Sign In
             </Button>
           </form>

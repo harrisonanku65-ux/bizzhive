@@ -1,12 +1,37 @@
 import { useParams } from "wouter";
 import { Link } from "wouter";
-import { useGetVendor, useListCourses, useListProducts, useGetVendorStats } from "@workspace/api-client-react";
+import {
+  useGetVendor,
+  useListCourses,
+  useListProducts,
+  useGetVendorStats,
+  useListSessionSlots,
+  useListVendorReviews,
+  useCreateVendorReview,
+  useAddToCart,
+  getGetCartQueryKey,
+  getListVendorReviewsQueryKey,
+  getGetVendorQueryKey,
+} from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, MapPin, BookOpen, ShoppingBag, Users } from "lucide-react";
+import {
+  Star,
+  MapPin,
+  BookOpen,
+  ShoppingBag,
+  Users,
+  CheckCircle,
+  CalendarClock,
+  Clock,
+} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { ReviewSection } from "@/components/ReviewSection";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function VendorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +40,57 @@ export default function VendorDetail() {
   const { data: courses } = useListCourses({ vendorId });
   const { data: products } = useListProducts({ vendorId });
   const { data: stats } = useGetVendorStats(vendorId);
+  const { data: slots } = useListSessionSlots({ vendorId });
+  const { data: reviews } = useListVendorReviews(vendorId);
+
+  const addToCart = useAddToCart();
+  const createReview = useCreateVendorReview();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [slotError, setSlotError] = useState<string | null>(null);
+
+  const handleReserve = (slotId: number) => {
+    setSlotError(null);
+    addToCart.mutate(
+      { data: { itemType: "session", itemId: slotId } },
+      {
+        onSuccess: () =>
+          queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() }),
+        onError: () => {
+          setSlotError("That slot was just taken. Please pick another time.");
+          queryClient.invalidateQueries();
+        },
+      },
+    );
+  };
+
+  const handleReview = (review: {
+    rating: number;
+    comment: string;
+    userName: string;
+  }) => {
+    setReviewError(null);
+    createReview.mutate(
+      { id: vendorId, data: review },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListVendorReviewsQueryKey(vendorId),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetVendorQueryKey(vendorId),
+          });
+        },
+        onError: (err: any) =>
+          setReviewError(
+            err?.status === 409
+              ? "You've already reviewed this creator."
+              : "We couldn't post that review. Please try again.",
+          ),
+      },
+    );
+  };
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><Skeleton className="h-64" /></div>;
@@ -40,6 +116,11 @@ export default function VendorDetail() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <h1 className="text-3xl font-display font-bold">{vendor.name}</h1>
+              {vendor.verifiedSeller && (
+                <Badge className="bg-primary/10 text-primary border-primary/20">
+                  <CheckCircle className="h-3 w-3 mr-1" /> Verified Seller
+                </Badge>
+              )}
               {vendor.featured && <Badge className="bg-accent text-accent-foreground">Featured Creator</Badge>}
             </div>
             {vendor.location && (
@@ -66,6 +147,8 @@ export default function VendorDetail() {
         <TabsList className="mb-6">
           <TabsTrigger value="courses">Courses ({courses?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="products">Products ({products?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="sessions">Sessions ({slots?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews ({reviews?.length ?? 0})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="courses">
@@ -127,6 +210,83 @@ export default function VendorDetail() {
               <p className="text-muted-foreground">No products yet</p>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="sessions">
+          {slotError && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              {slotError}
+            </div>
+          )}
+          {slots && slots.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {slots.map((slot: any) => (
+                <Card key={slot.id} className="h-full">
+                  <CardContent className="p-5">
+                    <Badge variant="secondary" className="mb-3">
+                      {slot.categoryName}
+                    </Badge>
+                    <h3 className="font-semibold text-sm mb-2">{slot.title}</h3>
+                    {slot.description && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {slot.description}
+                      </p>
+                    )}
+                    <div className="space-y-1.5 text-sm mb-4">
+                      <div className="flex items-center gap-2">
+                        <CalendarClock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span>
+                          {new Date(slot.startsAt).toLocaleString("en-GH", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span>{slot.durationMinutes} minutes</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-3">
+                      <span className="font-bold text-primary font-display">
+                        GHS {slot.price.toFixed(2)}
+                      </span>
+                      <Button
+                        size="sm"
+                        className="rounded-full"
+                        disabled={addToCart.isPending}
+                        onClick={() => handleReserve(slot.id)}
+                      >
+                        Reserve
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <CalendarClock className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-muted-foreground">
+                No sessions available right now
+              </p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <ReviewSection
+            reviews={reviews}
+            onSubmit={handleReview}
+            isSubmitting={createReview.isPending}
+            error={reviewError}
+            defaultUserName={
+              user?.displayName ??
+              [user?.firstName, user?.lastName].filter(Boolean).join(" ")
+            }
+            heading={`Reviews for ${vendor.name}`}
+            emptyMessage="No reviews for this creator yet."
+          />
         </TabsContent>
       </Tabs>
     </div>

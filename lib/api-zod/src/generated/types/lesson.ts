@@ -15,5 +15,7 @@ export interface Lesson {
   duration?: string | null;
   sortOrder: number;
   isFree: boolean;
+  /** @nullable */
+  contentUrl?: string | null;
   courseId: number;
 }

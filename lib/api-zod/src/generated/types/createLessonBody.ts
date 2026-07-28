@@ -12,4 +12,5 @@ export interface CreateLessonBody {
   duration?: string;
   sortOrder: number;
   isFree?: boolean;
+  contentUrl?: string;
 }

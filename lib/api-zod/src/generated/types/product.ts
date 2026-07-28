@@ -20,6 +20,10 @@ export interface Product {
   productType: ProductProductType;
   /** @nullable */
   fileUrl?: string | null;
+  /** @nullable */
+  previewUrl?: string | null;
+  /** @nullable */
+  licenseTerms?: string | null;
   rating: number;
   reviewsCount: number;
   salesCount: number;

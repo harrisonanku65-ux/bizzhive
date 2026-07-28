@@ -12,4 +12,5 @@ export type CartItemItemType =
 export const CartItemItemType = {
   course: "course",
   product: "product",
+  session: "session",
 } as const;

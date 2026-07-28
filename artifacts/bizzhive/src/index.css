@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -78,66 +78,76 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* High Contrast Warm Palette */
-  --background: 40 33% 98%; /* #FAFAF8 */
-  --foreground: 0 0% 9%; /* #171717 */
+  /* ------------------------------------------------------------------
+     Ink & Gold — derived from the BizzHive brand mark (black disc, gold
+     ring, honeycomb). Ink carries authority, gold marks anything you can
+     act on, warm off-white keeps it human rather than clinical.
 
-  --border: 40 10% 85%;
-  --input: 40 10% 85%;
-  --ring: 24 100% 50%; /* Vibrant Orange #FF6B00 */
+     Two golds on purpose:
+       --primary  deep bronze-gold, dark enough for body text and links
+                  (~6.5:1 on white). Bright gold as text fails contrast.
+       --accent   bright brand gold, for fills, badges and highlights,
+                  always paired with dark foreground.
+     ------------------------------------------------------------------ */
+  --background: 44 33% 97%; /* #FAF9F5 warm off-white */
+  --foreground: 240 28% 14%; /* #1A1A2E navy ink */
+
+  --border: 42 12% 86%;
+  --input: 42 12% 86%;
+  --ring: 45 69% 47%;
 
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 9%;
-  --card-border: 40 10% 85%;
+  --card-foreground: 240 6% 7%;
+  --card-border: 42 12% 87%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 9%;
-  --popover-border: 40 10% 85%;
+  --popover-foreground: 240 6% 7%;
+  --popover-border: 42 12% 87%;
 
-  --primary: 24 100% 50%; /* Vibrant Orange */
-  --primary-foreground: 0 0% 100%;
+  --primary: 45 84% 29%; /* #8A6D0B deep gold — readable as text */
+  --primary-foreground: 44 33% 97%;
 
-  --secondary: 154 100% 21%; /* Deep Green #006B3F */
-  --secondary-foreground: 0 0% 100%;
+  --secondary: 240 28% 14%; /* navy ink, for dark surfaces */
+  --secondary-foreground: 44 33% 97%;
 
-  --muted: 40 20% 92%;
-  --muted-foreground: 40 5% 40%;
+  --muted: 42 22% 93%;
+  --muted-foreground: 42 6% 38%;
 
-  --accent: 46 100% 50%; /* Golden Yellow #FFC100 */
-  --accent-foreground: 0 0% 9%;
+  --accent: 45 69% 47%; /* #C9A227 brand gold */
+  --accent-foreground: 45 80% 9%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 45%;
   --destructive-foreground: 0 0% 100%;
 
-  --sidebar: 40 33% 96%;
-  --sidebar-foreground: 0 0% 9%;
-  --sidebar-border: 40 10% 85%;
-  --sidebar-primary: 24 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 40 20% 90%;
-  --sidebar-accent-foreground: 0 0% 9%;
-  --sidebar-ring: 24 100% 50%;
+  --sidebar: 44 30% 96%;
+  --sidebar-foreground: 240 6% 7%;
+  --sidebar-border: 42 12% 86%;
+  --sidebar-primary: 45 84% 29%;
+  --sidebar-primary-foreground: 44 33% 97%;
+  --sidebar-accent: 42 22% 91%;
+  --sidebar-accent-foreground: 240 6% 7%;
+  --sidebar-ring: 45 69% 47%;
 
-  --chart-1: 24 100% 50%;
-  --chart-2: 154 100% 21%;
-  --chart-3: 46 100% 50%;
-  --chart-4: 300 100% 40%;
-  --chart-5: 200 100% 40%;
+  --chart-1: 45 69% 47%;  /* gold */
+  --chart-2: 240 6% 20%;  /* ink */
+  --chart-3: 214 58% 34%; /* informational blue */
+  --chart-4: 162 60% 26%; /* confirmed green */
+  --chart-5: 42 40% 62%;  /* muted sand */
 
-  --app-font-sans: 'Plus Jakarta Sans', sans-serif;
-  --app-font-display: 'Space Grotesk', sans-serif;
+  --app-font-sans: 'Inter', system-ui, sans-serif;
+  --app-font-display: 'Raleway', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.75rem;
   
-  --shadow-2xs: 0px 2px 0px 0px rgba(0,0,0,0.05);
-  --shadow-xs: 0px 2px 0px 0px rgba(0,0,0,0.05);
-  --shadow-sm: 0px 4px 0px 0px rgba(0,0,0,0.1);
-  --shadow: 0px 6px 0px 0px rgba(0,0,0,0.15);
-  --shadow-md: 0px 8px 0px 0px rgba(0,0,0,0.2);
-  --shadow-lg: 0px 12px 0px 0px rgba(0,0,0,0.25);
-  --shadow-xl: 0px 16px 0px 0px rgba(0,0,0,0.3);
-  --shadow-2xl: 0px 24px 0px 0px rgba(0,0,0,0.35);
+  --shadow-2xs: 0 3px 15px rgba(0, 0, 0, 0.03);
+  --shadow-xs: 0 3px 10px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 3px 15px rgba(0, 0, 0, 0.05);
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 5px 25px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 3px 20px -2px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0px 0px 20px rgba(0, 0, 0, 0.1);
   
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
@@ -155,59 +165,61 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 0 0% 5%;
-  --foreground: 40 33% 98%;
+  /* On dark surfaces the contrast problem inverts: bright gold now reads
+     well as text, so primary moves up the ramp rather than down. */
+  --background: 240 24% 9%;
+  --foreground: 44 33% 97%;
 
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
-  --ring: 24 100% 50%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --ring: 45 69% 52%;
 
-  --card: 0 0% 8%;
-  --card-foreground: 40 33% 98%;
-  --card-border: 0 0% 15%;
+  --card: 240 5% 9%;
+  --card-foreground: 44 33% 97%;
+  --card-border: 240 4% 16%;
 
-  --popover: 0 0% 8%;
-  --popover-foreground: 40 33% 98%;
-  --popover-border: 0 0% 15%;
+  --popover: 240 5% 9%;
+  --popover-foreground: 44 33% 97%;
+  --popover-border: 240 4% 16%;
 
-  --primary: 24 100% 50%;
-  --primary-foreground: 0 0% 100%;
+  --primary: 45 72% 58%;
+  --primary-foreground: 45 80% 9%;
 
-  --secondary: 154 100% 30%;
-  --secondary-foreground: 0 0% 100%;
+  --secondary: 240 5% 18%;
+  --secondary-foreground: 44 33% 97%;
 
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 240 4% 15%;
+  --muted-foreground: 42 6% 62%;
 
-  --accent: 46 100% 50%;
-  --accent-foreground: 0 0% 9%;
+  --accent: 45 69% 52%;
+  --accent-foreground: 45 80% 9%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --sidebar: 0 0% 8%;
-  --sidebar-foreground: 40 33% 98%;
-  --sidebar-border: 0 0% 15%;
-  --sidebar-primary: 24 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 0% 15%;
-  --sidebar-accent-foreground: 40 33% 98%;
-  --sidebar-ring: 24 100% 50%;
+  --sidebar: 240 5% 9%;
+  --sidebar-foreground: 44 33% 97%;
+  --sidebar-border: 240 4% 16%;
+  --sidebar-primary: 45 72% 58%;
+  --sidebar-primary-foreground: 45 80% 9%;
+  --sidebar-accent: 240 4% 15%;
+  --sidebar-accent-foreground: 44 33% 97%;
+  --sidebar-ring: 45 69% 52%;
 
-  --chart-1: 24 100% 50%;
-  --chart-2: 154 100% 30%;
-  --chart-3: 46 100% 50%;
+  --chart-1: 214 82% 51%;
+  --chart-2: 214 55% 35%;
+  --chart-3: 37 91% 55%;
   --chart-4: 300 100% 50%;
   --chart-5: 200 100% 50%;
   
-  --shadow-2xs: 0px 2px 0px 0px rgba(255,255,255,0.02);
-  --shadow-xs: 0px 2px 0px 0px rgba(255,255,255,0.05);
-  --shadow-sm: 0px 4px 0px 0px rgba(255,255,255,0.05);
-  --shadow: 0px 6px 0px 0px rgba(255,255,255,0.05);
-  --shadow-md: 0px 8px 0px 0px rgba(255,255,255,0.05);
-  --shadow-lg: 0px 12px 0px 0px rgba(255,255,255,0.05);
-  --shadow-xl: 0px 16px 0px 0px rgba(255,255,255,0.05);
-  --shadow-2xl: 0px 24px 0px 0px rgba(255,255,255,0.05);
+  --shadow-2xs: 0 3px 15px rgba(0, 0, 0, 0.03);
+  --shadow-xs: 0 3px 10px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 3px 15px rgba(0, 0, 0, 0.05);
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 5px 25px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 3px 20px -2px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0px 0px 20px rgba(0, 0, 0, 0.1);
 }
 
 @layer base {
@@ -292,3 +304,83 @@
     inset: -1px;
   }
 }
+/* ------------------------------------------------------------------
+   Brand surfaces
+
+   .surface-ink       dark band used for the hero and closing CTA. Sets its
+                      own foreground colours so it reads correctly in both
+                      light and dark mode without extra classes.
+   .honeycomb         faint hexagon field, echoing the "Hive" in the mark.
+                      Decorative only — pointer-events are disabled so it
+                      never intercepts clicks on content above it.
+   ------------------------------------------------------------------ */
+
+.surface-ink {
+  background-color: hsl(240 28% 14%);
+  color: hsl(44 33% 97%);
+  position: relative;
+  isolation: isolate;
+}
+
+.surface-ink .text-muted-foreground {
+  color: hsl(42 6% 66%);
+}
+
+.honeycomb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='48' viewBox='0 0 56 48'%3E%3Cpath d='M28 2 L52 16 L52 40 L28 54 L4 40 L4 16 Z' fill='none' stroke='%23C9A227' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-size: 56px 48px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .surface-ink { transition: background-color 200ms ease; }
+}
+
+/* ------------------------------------------------------------------
+   Card treatment matching bizzhivegh.com
+
+   --brand-blue is the live site's accent (#1a73e8), used on category and
+   feature card icons. It stays separate from the gold action colour: blue
+   marks *what a thing is*, gold marks *what you can do*.
+
+   .card-lift reproduces Arsha's resting/hover shadow pair — a soft diffused
+   drop that deepens and tints toward the accent on hover.
+   ------------------------------------------------------------------ */
+
+:root {
+  --brand-blue: 214 82% 51%;   /* #1A73E8 */
+  --brand-blue-soft: 214 82% 96%;
+}
+
+.dark {
+  --brand-blue: 214 82% 62%;
+  --brand-blue-soft: 214 40% 18%;
+}
+
+.text-brand-blue { color: hsl(var(--brand-blue)); }
+.bg-brand-blue-soft { background-color: hsl(var(--brand-blue-soft)); }
+
+.card-lift {
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.card-lift:hover {
+  box-shadow: 0 15px 30px hsl(var(--brand-blue) / 0.15);
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift { transition: none; }
+  .card-lift:hover { transform: none; }
+}
+
+/* Nav and buttons use Poppins, matching --nav-font on the live site. */
+nav, .font-nav, button { font-family: 'Poppins', var(--app-font-sans); }

@@ -3,6 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const vendorsTable = pgTable("vendors", {
+  
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
@@ -18,7 +19,15 @@ export const vendorsTable = pgTable("vendors", {
   momoNetwork: text("momo_network"),
   paystackRecipientCode: text("paystack_recipient_code"),
   payoutPercentage: real("payout_percentage").notNull().default(80),
+  plan: text("plan").notNull().default("free"), // 'free' | 'pro' | 'premium'
+  planExpiresAt: timestamp("plan_expires_at"),
+  verifiedSeller: boolean("verified_seller").notNull().default(false),
+  paystackCustomerCode: text("paystack_customer_code"),
+  paystackSubscriptionCode: text("paystack_subscription_code"),
+  paystackEmailToken: text("paystack_email_token"),
 });
+
+
 
 export const insertVendorSchema = createInsertSchema(vendorsTable).omit({ id: true, createdAt: true, rating: true, totalSales: true });
 export type InsertVendor = z.infer<typeof insertVendorSchema>;

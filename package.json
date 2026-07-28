@@ -5,6 +5,9 @@
   "scripts": {
     "preinstall": "node scripts/check-pnpm.js",
     "db:push": "node scripts/db-push.js",
+    "db:studio": "node scripts/db-studio.js",
+    "db:seed": "pnpm --filter @workspace/scripts run seed",
+    "create-admin": "pnpm --filter @workspace/scripts run create-admin",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

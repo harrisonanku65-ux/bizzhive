@@ -14,5 +14,6 @@ export const CreateProductBodyProductType = {
   template: "template",
   software: "software",
   asset: "asset",
+  audio: "audio",
   other: "other",
 } as const;

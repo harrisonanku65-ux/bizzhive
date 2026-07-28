@@ -1,14 +1,15 @@
 import { Link } from "wouter";
-import { useGetFeaturedContent, useListCategories } from "@workspace/api-client-react";
+import { useGetFeaturedContent, useListCategories, useGetDashboardStats } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, BookOpen, Users, ShoppingBag, ArrowRight, TrendingUp } from "lucide-react";
+import { Star, BookOpen, Users, ShoppingBag, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const { data: featured, isLoading } = useGetFeaturedContent();
   const { data: categories } = useListCategories();
+  const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
 
   return (
     <div>
@@ -42,26 +43,33 @@ export default function Home() {
 
       <section className="py-8 bg-muted/30 border-y border-border/40">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-3 gap-4 text-center">
             <div className="flex flex-col items-center gap-1">
               <BookOpen className="h-5 w-5 text-primary mb-1" />
-              <span className="text-2xl font-bold font-display">50+</span>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-14" />
+              ) : (
+                <span className="text-2xl font-bold font-display">{(stats?.totalCourses ?? 0).toLocaleString()}</span>
+              )}
               <span className="text-xs text-muted-foreground">Online Courses</span>
             </div>
             <div className="flex flex-col items-center gap-1">
               <ShoppingBag className="h-5 w-5 text-primary mb-1" />
-              <span className="text-2xl font-bold font-display">100+</span>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-14" />
+              ) : (
+                <span className="text-2xl font-bold font-display">{(stats?.totalProducts ?? 0).toLocaleString()}</span>
+              )}
               <span className="text-xs text-muted-foreground">Digital Products</span>
             </div>
             <div className="flex flex-col items-center gap-1">
               <Users className="h-5 w-5 text-primary mb-1" />
-              <span className="text-2xl font-bold font-display">30+</span>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-14" />
+              ) : (
+                <span className="text-2xl font-bold font-display">{(stats?.totalVendors ?? 0).toLocaleString()}</span>
+              )}
               <span className="text-xs text-muted-foreground">Expert Creators</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <TrendingUp className="h-5 w-5 text-primary mb-1" />
-              <span className="text-2xl font-bold font-display">GHS 50K+</span>
-              <span className="text-xs text-muted-foreground">Creator Earnings</span>
             </div>
           </div>
         </div>

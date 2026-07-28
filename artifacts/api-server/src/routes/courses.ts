@@ -72,7 +72,7 @@ router.get("/courses", async (req, res): Promise<void> => {
     .innerJoin(vendorsTable, eq(coursesTable.vendorId, vendorsTable.id))
     .innerJoin(categoriesTable, eq(coursesTable.categoryId, categoriesTable.id))
     .where(filters.length > 0 ? and(...filters) : undefined)
-    .orderBy(orderBy);
+    .orderBy(desc(sql<number>`CASE WHEN ${vendorsTable.plan} = 'premium' THEN 2 WHEN ${vendorsTable.plan} = 'pro' THEN 1 ELSE 0 END`), orderBy);
 
   res.json(ListCoursesResponse.parse(courses));
 });
@@ -85,19 +85,32 @@ router.post("/courses", async (req, res): Promise<void> => {
   }
 
   const slug = parsed.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
+
+  const [existingVendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, parsed.data.vendorId));
+  const limit = existingVendor?.plan === "premium" ? Infinity : existingVendor?.plan === "pro" ? 10 : 1;
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(coursesTable)
+    .where(eq(coursesTable.vendorId, parsed.data.vendorId));
+
+  if (count >= limit) {
+    res.status(403).json({ error: "Listing limit reached for your plan. Upgrade to add more." });
+    return;
+  }
+
   const [course] = await db.insert(coursesTable).values({
     ...parsed.data,
     slug,
     currency: parsed.data.currency ?? "GHS",
   }).returning();
 
-  const [vendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, course.vendorId));
   const [category] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, course.categoryId));
 
   const result = {
     ...course,
-    vendorName: vendor?.name ?? "",
-    vendorAvatar: vendor?.avatar ?? null,
+    vendorName: existingVendor?.name ?? "",
+    vendorAvatar: existingVendor?.avatar ?? null,
     categoryName: category?.name ?? "",
     lessonsCount: 0,
   };
@@ -240,7 +253,7 @@ router.get("/courses/:id/reviews", async (req, res): Promise<void> => {
   const reviews = await db
     .select()
     .from(reviewsTable)
-    .where(eq(reviewsTable.courseId, params.data.id))
+    .where(and(eq(reviewsTable.targetType, "course"), eq(reviewsTable.courseId, params.data.id)))
     .orderBy(desc(reviewsTable.createdAt));
 
   res.json(ListCourseReviewsResponse.parse(reviews));
@@ -261,10 +274,12 @@ router.post("/courses/:id/reviews", async (req, res): Promise<void> => {
 
   const [review] = await db.insert(reviewsTable).values({
     ...parsed.data,
+    targetType: "course",
     courseId: params.data.id,
+    userId: req.session?.userId ?? null,
   }).returning();
 
-  const reviews = await db.select().from(reviewsTable).where(eq(reviewsTable.courseId, params.data.id));
+  const reviews = await db.select().from(reviewsTable).where(and(eq(reviewsTable.targetType, "course"), eq(reviewsTable.courseId, params.data.id)));
   const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
   await db.update(coursesTable).set({
     rating: Math.round(avgRating * 10) / 10,

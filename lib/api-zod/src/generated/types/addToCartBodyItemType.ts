@@ -12,4 +12,5 @@ export type AddToCartBodyItemType =
 export const AddToCartBodyItemType = {
   course: "course",
   product: "product",
+  session: "session",
 } as const;

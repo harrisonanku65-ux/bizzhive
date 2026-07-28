@@ -49,6 +49,8 @@ router.get("/products", async (req, res): Promise<void> => {
       currency: productsTable.currency,
       productType: productsTable.productType,
       fileUrl: productsTable.fileUrl,
+      previewUrl: productsTable.previewUrl,
+      licenseTerms: productsTable.licenseTerms,
       rating: productsTable.rating,
       reviewsCount: productsTable.reviewsCount,
       salesCount: productsTable.salesCount,
@@ -65,7 +67,7 @@ router.get("/products", async (req, res): Promise<void> => {
     .innerJoin(vendorsTable, eq(productsTable.vendorId, vendorsTable.id))
     .innerJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
     .where(filters.length > 0 ? and(...filters) : undefined)
-    .orderBy(orderBy);
+    .orderBy(desc(sql<number>`CASE WHEN ${vendorsTable.plan} = 'premium' THEN 2 WHEN ${vendorsTable.plan} = 'pro' THEN 1 ELSE 0 END`), orderBy);
 
   res.json(ListProductsResponse.parse(products));
 });
@@ -77,6 +79,19 @@ router.post("/products", async (req, res): Promise<void> => {
     return;
   }
 
+  const [existingVendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, parsed.data.vendorId));
+  const limit = existingVendor?.plan === "premium" ? Infinity : existingVendor?.plan === "pro" ? 10 : 1;
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(productsTable)
+    .where(eq(productsTable.vendorId, parsed.data.vendorId));
+
+  if (count >= limit) {
+    res.status(403).json({ error: "Listing limit reached for your plan. Upgrade to add more." });
+    return;
+  }
+
   const slug = parsed.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
   const [product] = await db.insert(productsTable).values({
     ...parsed.data,
@@ -84,13 +99,12 @@ router.post("/products", async (req, res): Promise<void> => {
     currency: parsed.data.currency ?? "GHS",
   }).returning();
 
-  const [vendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, product.vendorId));
   const [category] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, product.categoryId));
 
   res.status(201).json({
     ...product,
-    vendorName: vendor?.name ?? "",
-    vendorAvatar: vendor?.avatar ?? null,
+    vendorName: existingVendor?.name ?? "",
+    vendorAvatar: existingVendor?.avatar ?? null,
     categoryName: category?.name ?? "",
   });
 });
@@ -113,6 +127,8 @@ router.get("/products/:id", async (req, res): Promise<void> => {
       currency: productsTable.currency,
       productType: productsTable.productType,
       fileUrl: productsTable.fileUrl,
+      previewUrl: productsTable.previewUrl,
+      licenseTerms: productsTable.licenseTerms,
       rating: productsTable.rating,
       reviewsCount: productsTable.reviewsCount,
       salesCount: productsTable.salesCount,

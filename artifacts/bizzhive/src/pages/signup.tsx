@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { Check, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordStrength } from "@/components/PasswordStrength";
+import { checkPassword, PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -24,14 +28,24 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const { register, isLoading } = useAuth();
+  const { register, isRegistering } = useAuth();
   const [, navigate] = useLocation();
+
+  // Re-evaluated on every keystroke so the checklist and meter stay live.
+  // Email and names are passed in so a password built from them is rejected.
+  const passwordCheck = checkPassword(password, { email, firstName, lastName });
+  const passwordsMatch =
+    confirmPassword.length > 0 && password === confirmPassword;
+  const canSubmit = passwordCheck.valid && passwordsMatch && agreeTerms;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) { setError("Password must be at least 6 characters"); return; }
+    if (!passwordCheck.valid) {
+      setError(passwordCheck.error ?? "Please choose a stronger password.");
+      return;
+    }
     if (password !== confirmPassword) { setError("Passwords do not match"); return; }
     if (!agreeTerms) { setError("Please agree to the terms"); return; }
 
@@ -50,7 +64,10 @@ export default function Signup() {
       });
       navigate("/");
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Registration failed. Please try again.");
+      // ApiError puts the parsed response body on `.data`, not `.response.data`
+      // — so this now surfaces real messages like "An account with this email
+      // already exists" instead of a generic failure.
+      setError(err?.data?.error ?? "Registration failed. Please try again.");
     }
   };
 
@@ -154,15 +171,46 @@ export default function Signup() {
           {step === 3 && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Password</label>
-                  <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" className="w-full bg-muted rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Confirm Password</label>
-                  <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat password" className="w-full bg-muted rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                </div>
+                <PasswordInput
+                  label="Password"
+                  name="new-password"
+                  autoComplete="new-password"
+                  required
+                  minLength={PASSWORD_MIN_LENGTH}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Create a password"
+                />
+                <PasswordInput
+                  label="Confirm Password"
+                  name="confirm-password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat password"
+                />
               </div>
+
+              <PasswordStrength check={passwordCheck} show={password.length > 0} />
+
+              {confirmPassword.length > 0 && (
+                <p
+                  className={`text-xs flex items-center gap-1.5 ${
+                    passwordsMatch ? "text-green-700" : "text-destructive"
+                  }`}
+                >
+                  {passwordsMatch ? (
+                    <>
+                      <Check className="h-3.5 w-3.5" /> Passwords match
+                    </>
+                  ) : (
+                    <>
+                      <X className="h-3.5 w-3.5" /> Passwords don't match yet
+                    </>
+                  )}
+                </p>
+              )}
 
               {accountType === "seller" && (
                 <div className="space-y-3 bg-secondary/5 rounded-xl p-4 border border-secondary/20">
@@ -192,8 +240,8 @@ export default function Signup() {
 
               <div className="flex gap-3">
                 <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 rounded-full">Back</Button>
-                <Button type="submit" className="flex-1 rounded-full" size="lg" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <User className="h-4 w-4 mr-2" />}
+                <Button type="submit" className="flex-1 rounded-full" size="lg" disabled={isRegistering || !canSubmit}>
+                  {isRegistering ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <User className="h-4 w-4 mr-2" />}
                   Create Account
                 </Button>
               </div>

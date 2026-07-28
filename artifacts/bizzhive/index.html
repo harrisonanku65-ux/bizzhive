@@ -3,15 +3,158 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>BizzHive</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>BizzHive — Buy and Sell Digital Services in Ghana, Safely</title>
+    <meta
+      name="description"
+      content="BizzHive connects Ghanaian creators, coaches and entrepreneurs with customers ready to buy. Courses, coaching, beats, templates, tech services and gaming — with payment held securely until delivery is confirmed."
+    />
+
+    <!-- Brand marks carried over from bizzhivegh.com -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Link previews (WhatsApp, Facebook, X) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BizzHive" />
+    <meta property="og:title" content="BizzHive — Ghana's trusted digital marketplace" />
+    <meta
+      property="og:description"
+      content="No more WhatsApp stress. Buy and sell courses, coaching, beats and digital services with buyer protection built in."
+    />
+    <meta property="og:image" content="/opengraph.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://js.paystack.co/v1/inline.js" defer></script>
-    <script src="https://checkout.flutterwave.com/v3.js" defer></script>
+
+    <!--
+      Fonts are imported at the top of src/index.css (Inter, Raleway, Poppins).
+
+      The Paystack and Flutterwave SDKs are deliberately NOT loaded here. They
+      are pulled in on demand by src/lib/paymentScripts.ts when the checkout
+      modal needs one — see the comment there for why.
+    -->
   </head>
   <body>
+    <!--
+      Skeleton loader. Lives in index.html rather than React so it covers the
+      gap *before* the bundle parses and mounts — a React-side loader can't,
+      since it doesn't exist yet. main.tsx fades it out after first paint.
+
+      It mirrors the real layout (nav bar, ink hero, card row) rather than
+      showing a spinner, so the page appears to assemble rather than flash.
+      Styles are inline: no extra stylesheet round-trip before first paint.
+    -->
+    <div id="preloader" aria-hidden="true">
+      <div class="sk-nav">
+        <div class="sk-nav-inner">
+          <div class="sk sk-circle"></div>
+          <div class="sk sk-bar" style="width: 92px"></div>
+          <div class="sk-nav-links">
+            <div class="sk sk-bar" style="width: 58px"></div>
+            <div class="sk sk-bar" style="width: 76px"></div>
+            <div class="sk sk-bar" style="width: 64px"></div>
+            <div class="sk sk-bar" style="width: 70px"></div>
+          </div>
+          <div class="sk sk-pill"></div>
+        </div>
+      </div>
+
+      <div class="sk-hero">
+        <div class="sk-hero-inner">
+          <div class="sk sk-dark sk-bar" style="width: 210px; height: 22px"></div>
+          <div class="sk sk-dark sk-bar" style="width: 84%; height: 40px; margin-top: 22px"></div>
+          <div class="sk sk-dark sk-bar" style="width: 62%; height: 40px; margin-top: 12px"></div>
+          <div class="sk sk-dark sk-bar" style="width: 74%; height: 15px; margin-top: 26px"></div>
+          <div class="sk sk-dark sk-bar" style="width: 56%; height: 15px; margin-top: 10px"></div>
+          <div class="sk-hero-btns">
+            <div class="sk sk-gold sk-pill" style="width: 158px"></div>
+            <div class="sk sk-dark sk-pill" style="width: 150px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sk-cards">
+        <div class="sk-card"><div class="sk sk-sq"></div><div class="sk sk-bar" style="width: 70%"></div><div class="sk sk-bar" style="width: 90%; height: 11px"></div><div class="sk sk-bar" style="width: 60%; height: 11px"></div></div>
+        <div class="sk-card"><div class="sk sk-sq"></div><div class="sk sk-bar" style="width: 62%"></div><div class="sk sk-bar" style="width: 88%; height: 11px"></div><div class="sk sk-bar" style="width: 66%; height: 11px"></div></div>
+        <div class="sk-card"><div class="sk sk-sq"></div><div class="sk sk-bar" style="width: 74%"></div><div class="sk sk-bar" style="width: 84%; height: 11px"></div><div class="sk sk-bar" style="width: 54%; height: 11px"></div></div>
+      </div>
+    </div>
+    <style>
+      #preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background: #faf9f5;
+        overflow: hidden;
+        transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+      }
+      #preloader.is-hidden { opacity: 0; visibility: hidden; }
+
+      .sk {
+        background: #e8e5dc;
+        border-radius: 6px;
+        position: relative;
+        overflow: hidden;
+      }
+      .sk::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent);
+        animation: sk-shimmer 1.4s infinite;
+      }
+      .sk-dark { background: rgba(255,255,255,0.10); }
+      .sk-dark::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent); }
+      .sk-gold { background: rgba(201,162,39,0.55); }
+      .sk-bar { height: 13px; }
+      .sk-pill { height: 38px; width: 116px; border-radius: 99px; }
+      .sk-circle { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+      .sk-sq { width: 44px; height: 44px; border-radius: 10px; margin-bottom: 16px; }
+
+      .sk-nav { height: 64px; border-bottom: 1px solid #e8e5dc; display: flex; align-items: center; }
+      .sk-nav-inner {
+        width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px;
+        display: flex; align-items: center; gap: 16px;
+      }
+      .sk-nav-links { display: none; gap: 22px; margin-left: 20px; flex: 1; }
+      .sk-nav-inner > .sk-pill { margin-left: auto; }
+
+      .sk-hero { background: #1a1a2e; padding: 84px 24px; }
+      .sk-hero-inner { max-width: 1280px; margin: 0 auto; }
+      .sk-hero-btns { display: flex; gap: 12px; margin-top: 32px; }
+
+      .sk-cards {
+        max-width: 1280px; margin: 0 auto; padding: 56px 24px;
+        display: grid; grid-template-columns: 1fr; gap: 24px;
+      }
+      .sk-card {
+        background: #fff; border: 1px solid #eceae2; border-radius: 12px;
+        padding: 24px; display: flex; flex-direction: column; gap: 10px;
+      }
+
+      @keyframes sk-shimmer { 100% { transform: translateX(100%); } }
+
+      @media (min-width: 768px) {
+        .sk-nav-links { display: flex; }
+        .sk-cards { grid-template-columns: repeat(3, 1fr); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sk::after { animation: none; }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        #preloader { background: #12121c; }
+        .sk { background: rgba(255,255,255,0.08); }
+        .sk::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent); }
+        .sk-nav { border-bottom-color: rgba(255,255,255,0.10); }
+        .sk-card { background: #16161f; border-color: rgba(255,255,255,0.08); }
+      }
+    </style>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
