@@ -12,6 +12,8 @@ import {
   UpdateProductResponse,
   DeleteProductParams,
 } from "@workspace/api-zod";
+import { requireOwnVendorId } from "../middlewares/requireVendor";
+import { countActiveListings, listingLimitForPlan } from "../lib/listingLimits";
 
 const router: IRouter = Router();
 
@@ -73,19 +75,18 @@ router.get("/products", async (req, res): Promise<void> => {
 });
 
 router.post("/products", async (req, res): Promise<void> => {
-  const parsed = CreateProductBody.safeParse(req.body);
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
+
+  const parsed = CreateProductBody.safeParse({ ...req.body, vendorId });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
 
-  const [existingVendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, parsed.data.vendorId));
-  const limit = existingVendor?.plan === "premium" ? Infinity : existingVendor?.plan === "pro" ? 10 : 1;
-
-  const [{ count }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(productsTable)
-    .where(eq(productsTable.vendorId, parsed.data.vendorId));
+  const [existingVendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, vendorId));
+  const limit = listingLimitForPlan(existingVendor?.plan);
+  const count = await countActiveListings(vendorId);
 
   if (count >= limit) {
     res.status(403).json({ error: "Listing limit reached for your plan. Upgrade to add more." });
@@ -196,12 +197,20 @@ router.delete("/products/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [product] = await db.delete(productsTable).where(eq(productsTable.id, params.data.id)).returning();
-  if (!product) {
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
+
+  const [existing] = await db.select({ vendorId: productsTable.vendorId }).from(productsTable).where(eq(productsTable.id, params.data.id));
+  if (!existing) {
     res.status(404).json({ error: "Product not found" });
     return;
   }
+  if (existing.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only delete your own products" });
+    return;
+  }
 
+  await db.delete(productsTable).where(eq(productsTable.id, params.data.id));
   res.sendStatus(204);
 });
 

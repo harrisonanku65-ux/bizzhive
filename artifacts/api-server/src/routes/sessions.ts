@@ -7,6 +7,8 @@ import {
   ordersTable,
 } from "@workspace/db";
 import { and, asc, desc, eq, gt, gte, isNull, lt, or, sql } from "drizzle-orm";
+import { requireOwnVendorId } from "../middlewares/requireVendor";
+import { countActiveListings, listingLimitForPlan } from "../lib/listingLimits";
 
 const router: IRouter = Router();
 
@@ -199,14 +201,10 @@ router.get("/vendors/:vendorId/session-slots", async (req, res): Promise<void> =
 });
 
 router.post("/session-slots", async (req, res): Promise<void> => {
-  const userId = req.session?.userId;
-  if (!userId) {
-    res.status(401).json({ error: "You must be signed in to publish availability" });
-    return;
-  }
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
 
   const {
-    vendorId,
     categoryId,
     title,
     description,
@@ -217,8 +215,8 @@ router.post("/session-slots", async (req, res): Promise<void> => {
     meetingNotes,
   } = req.body ?? {};
 
-  if (!vendorId || !categoryId || !title || !startsAt || price == null) {
-    res.status(400).json({ error: "vendorId, categoryId, title, startsAt and price are required" });
+  if (!categoryId || !title || !startsAt || price == null) {
+    res.status(400).json({ error: "categoryId, title, startsAt and price are required" });
     return;
   }
 
@@ -244,20 +242,10 @@ router.post("/session-slots", async (req, res): Promise<void> => {
 
   // Bookable slots count as active listings, same as courses and products, so
   // the plan limits advertised on the pricing page hold across all listing types.
-  const limit = vendor.plan === "premium" ? Infinity : vendor.plan === "pro" ? 10 : 1;
-  const [{ count: activeSlots }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(sessionSlotsTable)
-    .where(
-      and(
-        eq(sessionSlotsTable.vendorId, vendorId),
-        eq(sessionSlotsTable.published, true),
-        eq(sessionSlotsTable.status, "available"),
-        gte(sessionSlotsTable.startsAt, new Date()),
-      ),
-    );
+  const limit = listingLimitForPlan(vendor.plan);
+  const activeListings = await countActiveListings(vendorId);
 
-  if (activeSlots >= limit) {
+  if (activeListings >= limit) {
     res.status(403).json({
       error: `Your ${vendor.plan} plan allows ${limit === Infinity ? "unlimited" : limit} active listing${limit === 1 ? "" : "s"}. Upgrade your plan to publish more session slots.`,
       code: "listing_limit_reached",
@@ -285,14 +273,16 @@ router.post("/session-slots", async (req, res): Promise<void> => {
 
 router.put("/session-slots/:id", async (req, res): Promise<void> => {
   const slotId = parseInt(req.params.id);
-  if (!req.session?.userId) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
 
   const [slot] = await db.select().from(sessionSlotsTable).where(eq(sessionSlotsTable.id, slotId));
   if (!slot) {
     res.status(404).json({ error: "Session slot not found" });
+    return;
+  }
+  if (slot.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only edit your own session slots" });
     return;
   }
   if (slot.status === "booked") {
@@ -331,14 +321,16 @@ router.put("/session-slots/:id", async (req, res): Promise<void> => {
 
 router.delete("/session-slots/:id", async (req, res): Promise<void> => {
   const slotId = parseInt(req.params.id);
-  if (!req.session?.userId) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
 
   const [slot] = await db.select().from(sessionSlotsTable).where(eq(sessionSlotsTable.id, slotId));
   if (!slot) {
     res.status(404).json({ error: "Session slot not found" });
+    return;
+  }
+  if (slot.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only delete your own session slots" });
     return;
   }
   if (slot.status === "booked") {
@@ -353,14 +345,16 @@ router.delete("/session-slots/:id", async (req, res): Promise<void> => {
 /** Vendor cancels a booked session; the buyer is refunded by support. */
 router.post("/session-slots/:id/cancel", async (req, res): Promise<void> => {
   const slotId = parseInt(req.params.id);
-  if (!req.session?.userId) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
 
   const [slot] = await db.select().from(sessionSlotsTable).where(eq(sessionSlotsTable.id, slotId));
   if (!slot) {
     res.status(404).json({ error: "Session slot not found" });
+    return;
+  }
+  if (slot.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only cancel your own session slots" });
     return;
   }
 
@@ -375,14 +369,16 @@ router.post("/session-slots/:id/cancel", async (req, res): Promise<void> => {
 /** Vendor marks a session as delivered. The buyer still confirms to release funds. */
 router.post("/session-slots/:id/complete", async (req, res): Promise<void> => {
   const slotId = parseInt(req.params.id);
-  if (!req.session?.userId) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
 
   const [slot] = await db.select().from(sessionSlotsTable).where(eq(sessionSlotsTable.id, slotId));
   if (!slot) {
     res.status(404).json({ error: "Session slot not found" });
+    return;
+  }
+  if (slot.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only mark your own session slots complete" });
     return;
   }
   if (slot.status !== "booked") {

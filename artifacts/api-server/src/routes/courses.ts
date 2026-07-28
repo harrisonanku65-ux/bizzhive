@@ -18,6 +18,8 @@ import {
   CreateCourseReviewParams,
   CreateCourseReviewBody,
 } from "@workspace/api-zod";
+import { requireOwnVendorId } from "../middlewares/requireVendor";
+import { countActiveListings, listingLimitForPlan } from "../lib/listingLimits";
 
 const router: IRouter = Router();
 
@@ -78,7 +80,10 @@ router.get("/courses", async (req, res): Promise<void> => {
 });
 
 router.post("/courses", async (req, res): Promise<void> => {
-  const parsed = CreateCourseBody.safeParse(req.body);
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
+
+  const parsed = CreateCourseBody.safeParse({ ...req.body, vendorId });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
@@ -86,13 +91,9 @@ router.post("/courses", async (req, res): Promise<void> => {
 
   const slug = parsed.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
 
-  const [existingVendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, parsed.data.vendorId));
-  const limit = existingVendor?.plan === "premium" ? Infinity : existingVendor?.plan === "pro" ? 10 : 1;
-
-  const [{ count }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(coursesTable)
-    .where(eq(coursesTable.vendorId, parsed.data.vendorId));
+  const [existingVendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, vendorId));
+  const limit = listingLimitForPlan(existingVendor?.plan);
+  const count = await countActiveListings(vendorId);
 
   if (count >= limit) {
     res.status(403).json({ error: "Listing limit reached for your plan. Upgrade to add more." });
@@ -212,12 +213,20 @@ router.delete("/courses/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [course] = await db.delete(coursesTable).where(eq(coursesTable.id, params.data.id)).returning();
-  if (!course) {
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
+
+  const [existing] = await db.select({ vendorId: coursesTable.vendorId }).from(coursesTable).where(eq(coursesTable.id, params.data.id));
+  if (!existing) {
     res.status(404).json({ error: "Course not found" });
     return;
   }
+  if (existing.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only delete your own courses" });
+    return;
+  }
 
+  await db.delete(coursesTable).where(eq(coursesTable.id, params.data.id));
   res.sendStatus(204);
 });
 
@@ -225,6 +234,19 @@ router.post("/courses/:courseId/lessons", async (req, res): Promise<void> => {
   const params = CreateLessonParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const vendorId = await requireOwnVendorId(req, res);
+  if (vendorId === null) return;
+
+  const [course] = await db.select({ vendorId: coursesTable.vendorId }).from(coursesTable).where(eq(coursesTable.id, params.data.courseId));
+  if (!course) {
+    res.status(404).json({ error: "Course not found" });
+    return;
+  }
+  if (course.vendorId !== vendorId) {
+    res.status(403).json({ error: "You can only add lessons to your own courses" });
     return;
   }
 

@@ -10,6 +10,7 @@ import {
   GetTopVendorsResponse,
   GetCategoryBreakdownResponse,
 } from "@workspace/api-zod";
+import { requireOwnVendorId } from "../middlewares/requireVendor";
 
 const router: IRouter = Router();
 
@@ -244,6 +245,13 @@ router.get("/dashboard/vendor/:vendorId/analytics", async (req, res): Promise<vo
   const vendorId = parseInt(req.params.vendorId);
   if (Number.isNaN(vendorId)) {
     res.status(400).json({ error: "Invalid vendorId" });
+    return;
+  }
+
+  const requesterVendorId = await requireOwnVendorId(req, res);
+  if (requesterVendorId === null) return;
+  if (requesterVendorId !== vendorId) {
+    res.status(403).json({ error: "You can only view your own analytics" });
     return;
   }
 

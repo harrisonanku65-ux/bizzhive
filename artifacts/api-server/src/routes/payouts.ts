@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, vendorsTable, ordersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { requireOwnVendorId } from "../middlewares/requireVendor";
 
 const router: IRouter = Router();
 
@@ -70,6 +71,13 @@ async function sendPaystackTransfer(amount: number, recipientCode: string, refer
 router.put("/vendors/:vendorId/payout-settings", async (req, res): Promise<void> => {
   const vendorId = parseInt(req.params.vendorId);
   const { momoNumber, momoNetwork, email } = req.body;
+
+  const requesterVendorId = await requireOwnVendorId(req, res);
+  if (requesterVendorId === null) return;
+  if (requesterVendorId !== vendorId) {
+    res.status(403).json({ error: "You can only update your own payout settings" });
+    return;
+  }
 
   if (!momoNumber || !momoNetwork) {
     res.status(400).json({ error: "momoNumber and momoNetwork are required" });
