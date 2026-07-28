@@ -12,7 +12,11 @@ This guide gets the project running on Windows with VS Code.
 
 ## 1. Clone and open the project
 
-Open the project folder in VS Code.
+```powershell
+git clone https://github.com/harrisonanku65-ux/bizzhive.git
+```
+
+Then open the cloned folder in VS Code (`File > Open Folder...`) — open the folder itself, not a parent directory, so VS Code picks up `.vscode/launch.json` automatically.
 
 ## 2. Set up environment variables
 
