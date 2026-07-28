@@ -4,6 +4,7 @@ import { db, usersTable, vendorsTable, cartItemsTable, coursesTable, productsTab
 import { eq, and, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { loginRateLimit, registerRateLimit } from "../middlewares/rateLimit";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 const SALT_ROUNDS = 10;
@@ -110,16 +111,16 @@ router.post("/auth/register", registerRateLimit, async (req, res): Promise<void>
     return;
   }
 
-  const existing = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
-  if (existing.length > 0) {
-    res.status(409).json({ error: "An account with this email already exists" });
-    return;
-  }
-
-  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const userRole = role === "seller" ? "seller" : "buyer";
-
   try {
+    const existing = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
+    if (existing.length > 0) {
+      res.status(409).json({ error: "An account with this email already exists" });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const userRole = role === "seller" ? "seller" : "buyer";
+
     const result = await db.transaction(async (tx) => {
       let vendorId: number | null = null;
 
@@ -156,6 +157,7 @@ router.post("/auth/register", registerRateLimit, async (req, res): Promise<void>
       res.status(409).json({ error: "An account with this email already exists" });
       return;
     }
+    logger.error({ err }, "Registration failed");
     res.status(500).json({ error: "Registration failed. Please try again." });
   }
 });
@@ -168,22 +170,27 @@ router.post("/auth/login", loginRateLimit, async (req, res): Promise<void> => {
     return;
   }
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
+  try {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
 
-  if (!user || user.deletedAt) {
-    res.status(401).json({ error: "Invalid email or password" });
-    return;
+    if (!user || user.deletedAt) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    setAuthSession(req, user.id, user.role);
+    await mergeGuestCartIntoUser(req, user.id);
+    res.json(buildAuthUser(user));
+  } catch (err: any) {
+    logger.error({ err }, "Login failed");
+    res.status(500).json({ error: "Login failed. Please try again." });
   }
-
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) {
-    res.status(401).json({ error: "Invalid email or password" });
-    return;
-  }
-
-  setAuthSession(req, user.id, user.role);
-  await mergeGuestCartIntoUser(req, user.id);
-  res.json(buildAuthUser(user));
 });
 
 router.get("/auth/me", async (req, res): Promise<void> => {
