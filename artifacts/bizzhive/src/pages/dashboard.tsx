@@ -7,6 +7,8 @@ import {
   useListProducts,
   useCreateCourse,
   useCreateProduct,
+  useDeleteCourse,
+  useDeleteProduct,
   useCreateLesson,
   getListCoursesQueryKey,
   getListProductsQueryKey,
@@ -114,6 +116,8 @@ export default function Dashboard() {
   const subscribeVendor = useSubscribeVendor();
   const createCourse = useCreateCourse();
   const createProduct = useCreateProduct();
+  const deleteCourse = useDeleteCourse();
+  const deleteProduct = useDeleteProduct();
   const createLesson = useCreateLesson();
   const updatePayoutSettings = useUpdateVendorPayoutSettings();
   const queryClient = useQueryClient();
@@ -776,14 +780,29 @@ export default function Dashboard() {
                     >
                       {course.published ? "Published" : "Draft"}
                     </Badge>
-                    <div>
+                    <div className="flex items-center gap-2 mt-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="mt-1 h-auto p-0 text-xs text-primary"
+                        className="h-auto p-0 text-xs text-primary"
                         onClick={() => setManageLessonsCourseId(course.id)}
                       >
                         Manage Lessons
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-0 text-xs text-destructive"
+                        disabled={deleteCourse.isPending}
+                        onClick={() => {
+                          if (!window.confirm(`Delete "${course.title}"? This can't be undone and will also remove its reviews.`)) return;
+                          deleteCourse.mutate(
+                            { id: course.id },
+                            { onSuccess: () => queryClient.invalidateQueries({ queryKey: getListCoursesQueryKey() }) },
+                          );
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
@@ -1091,6 +1110,21 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground">
                       {product.salesCount} sold
                     </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-xs text-destructive mt-1"
+                      disabled={deleteProduct.isPending}
+                      onClick={() => {
+                        if (!window.confirm(`Delete "${product.title}"? This can't be undone and will also remove its reviews.`)) return;
+                        deleteProduct.mutate(
+                          { id: product.id },
+                          { onSuccess: () => queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() }) },
+                        );
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
