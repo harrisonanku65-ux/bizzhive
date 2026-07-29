@@ -26,9 +26,9 @@ docker compose up -d                                   # start local Postgres
 
 Per-package typecheck: `pnpm --filter <name> run typecheck` (e.g. `@workspace/api-server`, `@workspace/bizzhive`, `@workspace/mockup-sandbox`, `@workspace/scripts`).
 
-There is **no automated test suite** (no vitest/jest config, no `test` script anywhere in the workspace). QA is manual — see [`../BizzHive-Manual-Test-Guide.md`](../BizzHive-Manual-Test-Guide.md) one level up. Don't invent a `pnpm test` command.
+There is **no automated test suite** (no vitest/jest config, no `test` script anywhere in the workspace). QA is manual — see [`docs/BizzHive-Manual-Test-Guide.md`](docs/BizzHive-Manual-Test-Guide.md). Don't invent a `pnpm test` command. If tests are added later, mirror `src/` per package (e.g. `artifacts/api-server/tests/routes/products.test.ts` for `artifacts/api-server/src/routes/products.ts`) rather than a single top-level `tests/` folder.
 
-In VS Code, `F5` (or the **Run BizzHive** compound launch config in [.vscode/launch.json](.vscode/launch.json)) runs the API server and frontend together, loading `.env` via `envFile`. See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for the full local setup walkthrough.
+In VS Code, `F5` (or the **Run BizzHive** compound launch config in [.vscode/launch.json](.vscode/launch.json)) runs the API server and frontend together, loading `.env` via `envFile`. See [docs/WINDOWS_SETUP.md](docs/WINDOWS_SETUP.md) for the full local setup walkthrough.
 
 ### After changing `lib/api-spec/openapi.yaml`
 
