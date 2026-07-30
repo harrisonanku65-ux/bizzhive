@@ -13,8 +13,12 @@ router.get("/categories", async (_req, res): Promise<void> => {
       slug: categoriesTable.slug,
       description: categoriesTable.description,
       icon: categoriesTable.icon,
-      courseCount: sql<number>`(SELECT count(*) FROM courses WHERE courses.category_id = ${categoriesTable.id})::int`,
-      productCount: sql<number>`(SELECT count(*) FROM products WHERE products.category_id = ${categoriesTable.id})::int`,
+      // categories.id must stay qualified (not interpolated as ${categoriesTable.id})
+      // — Drizzle renders that as a bare "id", which Postgres then resolves
+      // against the subquery's own table instead of the outer categories row,
+      // silently turning this into courses.id = courses.category_id.
+      courseCount: sql<number>`(SELECT count(*) FROM courses WHERE courses.category_id = categories.id)::int`,
+      productCount: sql<number>`(SELECT count(*) FROM products WHERE products.category_id = categories.id)::int`,
     })
     .from(categoriesTable);
 
