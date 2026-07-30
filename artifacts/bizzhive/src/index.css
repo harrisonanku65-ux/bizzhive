@@ -104,7 +104,7 @@
   --popover-foreground: 240 6% 7%;
   --popover-border: 42 12% 87%;
 
-  --primary: 45 84% 29%; /* #8A6D0B deep gold — readable as text */
+  --primary: 45 84% 29%; /* #8A6D0B deep gold — unchanged, kept as the accent */
   --primary-foreground: 44 33% 97%;
 
   --secondary: 240 28% 14%; /* navy ink, for dark surfaces */

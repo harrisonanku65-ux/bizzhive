@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import {
   useListProducts,
@@ -38,7 +38,8 @@ export default function Products() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold mb-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-primary">Marketplace</span>
+        <h1 className="text-3xl font-display font-bold mt-2 mb-2">
           Digital Products
         </h1>
         <p className="text-muted-foreground">
@@ -46,7 +47,7 @@ export default function Products() {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 rounded-md border border-border/70 bg-card p-4 shadow-none">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <input
@@ -54,7 +55,7 @@ export default function Products() {
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-muted rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full bg-muted rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <Select value={categoryId} onValueChange={setCategoryId}>
@@ -100,14 +101,14 @@ export default function Products() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-72 rounded-xl" />
+            <Skeleton key={i} className="h-72 rounded-md" />
           ))}
         </div>
       ) : products && products.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <Link key={product.id} href={`/products/${product.id}`}>
-              <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all border-border/60 hover:border-primary/30 h-full">
+              <Card className="group overflow-hidden cursor-pointer rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all h-full">
                 <div className="aspect-[4/3] bg-gradient-to-br from-secondary/20 to-primary/10 relative">
                   {product.thumbnail ? (
                     <img
@@ -120,7 +121,7 @@ export default function Products() {
                       <ShoppingBag className="h-10 w-10 text-primary/40" />
                     </div>
                   )}
-                  <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground">
+                  <Badge variant="secondary" className="absolute top-3 left-3 rounded-sm">
                     {product.productType}
                   </Badge>
                 </div>
@@ -153,7 +154,7 @@ export default function Products() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <ShoppingBag className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+          <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No products found</h3>
           <p className="text-muted-foreground text-sm">
             Try adjusting your search or filters

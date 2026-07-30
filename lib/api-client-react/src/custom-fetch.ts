@@ -360,7 +360,11 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  // Fetch defaults to "same-origin", which silently drops the session cookie
+  // once the frontend and API are deployed to different domains (Netlify +
+  // Render). "include" works for both same-origin and cross-origin calls, so
+  // it's safe as the unconditional default.
+  const response = await fetch(input, { credentials: "include", ...init, method, headers });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

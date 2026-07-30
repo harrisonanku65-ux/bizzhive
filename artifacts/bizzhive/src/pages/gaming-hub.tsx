@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+﻿import { Link } from "wouter";
 import { useListCategories } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,14 +73,14 @@ export default function GamingHub() {
     <div>
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+          <Badge className="mb-4 rounded-sm bg-primary/10 text-primary border-primary/20">
             Gaming Hub
           </Badge>
           <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-4 flex items-center gap-3">
             <Gamepad2 className="h-9 w-9 text-primary" /> Level Up on BizzHive
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Ghana's first dedicated gaming marketplace — top-ups, verified
+            Ghana's first dedicated gaming marketplace â€” top-ups, verified
             accounts, coaching and guides. Safe, fast and trusted.
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function GamingHub() {
             return (
               <Card
                 key={offer.title}
-                className="hover:border-primary/40 transition-all hover:shadow-md"
+                className="rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all"
               >
                 <CardContent className="p-6">
                   <Icon className="h-8 w-8 text-primary mb-3" />
@@ -116,7 +116,7 @@ export default function GamingHub() {
         </div>
       </section>
 
-      <section className="py-12 md:py-16 bg-muted/20 border-t border-border/40">
+      <section className="py-16 md:py-20 bg-muted/20 border-y border-border/60">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-display font-bold mb-3">
             Sell to Ghana's gaming community
@@ -126,7 +126,7 @@ export default function GamingHub() {
             until the buyer confirms delivery, so both sides are protected.
           </p>
           <Link href="/signup?role=seller">
-            <Button size="lg" className="rounded-full">
+            <Button size="lg" className="font-semibold">
               Start Selling <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>

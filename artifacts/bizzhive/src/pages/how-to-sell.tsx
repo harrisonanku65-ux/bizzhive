@@ -1,9 +1,10 @@
-import { Link } from "wouter";
+﻿import { Link } from "wouter";
 
 export default function HowToSell() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <h1 className="text-3xl font-display font-bold mb-3">
+      <span className="text-xs font-semibold uppercase tracking-wider text-primary">Selling</span>
+      <h1 className="text-3xl font-display font-bold mt-2 mb-3">
         How to Sell on BizzHive
       </h1>
       <p className="text-muted-foreground mb-8">
@@ -29,8 +30,8 @@ export default function HowToSell() {
             2. List your first course, product or session
           </h2>
           <p>
-            From your Dashboard, click "New Course," "New Product," or — for
-            coaching and consultation calls — "New Slot" under Availability. Add
+            From your Dashboard, click "New Course," "New Product," or â€” for
+            coaching and consultation calls â€” "New Slot" under Availability. Add
             a title, description, price and thumbnail. For products, also upload
             the actual file buyers will download.
           </p>
@@ -51,8 +52,8 @@ export default function HowToSell() {
           </h2>
           <p>
             Add your Mobile Money details in your dashboard's payout settings.
-            BizzHive holds each payment until the buyer confirms delivery — or
-            until the hold expires on its own after a few days — then transfers
+            BizzHive holds each payment until the buyer confirms delivery â€” or
+            until the hold expires on its own after a few days â€” then transfers
             your share (80% by default) to your MoMo account automatically.
           </p>
         </section>

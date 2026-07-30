@@ -1,4 +1,4 @@
-import { useGetCart, useRemoveFromCart, getGetCartQueryKey, getListOrdersQueryKey } from "@workspace/api-client-react";
+﻿import { useGetCart, useRemoveFromCart, getGetCartQueryKey, getListOrdersQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -36,7 +36,7 @@ export default function Cart() {
 
       {!cart || cart.items.length === 0 ? (
         <div className="text-center py-16">
-          <ShoppingCart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+          <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">Your cart is empty</h3>
           <p className="text-muted-foreground text-sm mb-6">Start adding courses and products to your cart</p>
           <div className="flex gap-3 justify-center">
@@ -49,9 +49,9 @@ export default function Cart() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {cart.items.map((item) => (
-                <Card key={item.id}>
+                <Card key={item.id} className="rounded-md shadow-none border-border/70">
                   <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-20 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-20 h-16 rounded-md bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
                       {item.itemType === "course" ? (
                         <BookOpen className="h-8 w-8 text-primary/40" />
                       ) : (
@@ -80,7 +80,7 @@ export default function Cart() {
             </div>
 
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 rounded-md shadow-none border-border/70">
                 <CardContent className="p-6">
                   <h3 className="font-display font-bold text-lg mb-4">Order Summary</h3>
                   <div className="space-y-2 text-sm">
@@ -95,7 +95,7 @@ export default function Cart() {
                     <span className="text-primary font-display">GHS {cart.total.toFixed(2)}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-6">Pay via card or mobile money (MTN, Vodafone, AirtelTigo)</p>
-                  <Button className="w-full rounded-full" size="lg" onClick={() => setCheckoutOpen(true)}>
+                  <Button className="w-full font-semibold" size="lg" onClick={() => setCheckoutOpen(true)}>
                     Proceed to Payment
                   </Button>
                 </CardContent>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useLogin, useRegister, useLogout } from "@workspace/api-client-react";
+import { useLogin, useRegister, useLogout, getMe } from "@workspace/api-client-react";
 import type { AuthUser } from "@workspace/api-client-react";
 
 interface AuthContextValue {
@@ -45,11 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const init = async () => {
       try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        }
+        setUser(await getMe());
       } catch {}
       setIsLoading(false);
     };

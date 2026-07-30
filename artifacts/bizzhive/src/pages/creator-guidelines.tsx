@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+﻿import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 /**
- * The seller handbook — consolidated tutorial content for every part of
+ * The seller handbook â€” consolidated tutorial content for every part of
  * selling on BizzHive, plus the community rules.
  *
  * Kept as one scrollable page with a contents list rather than split across
@@ -84,7 +84,7 @@ const PRODUCT_TYPES = [
     type: "Other",
     icon: Package,
     what: "Genuinely doesn't fit above.",
-    examples: "Use sparingly — buyers filter by type, so this hides your work.",
+    examples: "Use sparingly â€” buyers filter by type, so this hides your work.",
   },
 ];
 
@@ -102,7 +102,7 @@ function Section({
   return (
     <section id={id} className="scroll-mt-24">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Icon className="h-4 w-4 text-primary" />
         </div>
         <h2 className="text-xl font-display font-bold text-foreground">
@@ -119,18 +119,18 @@ function Section({
 export default function CreatorGuidelines() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+      <Badge className="mb-4 rounded-sm bg-primary/10 text-primary border-primary/20">
         Seller handbook
       </Badge>
       <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">
         Creator Guidelines
       </h1>
       <p className="text-muted-foreground mb-8">
-        Everything you need to sell on BizzHive — how each listing type works,
+        Everything you need to sell on BizzHive â€” how each listing type works,
         how you get paid, and the rules everyone follows.
       </p>
 
-      <Card className="mb-10">
+      <Card className="mb-10 rounded-md shadow-none border-border/70">
         <CardContent className="p-5">
           <p className="text-sm font-medium mb-3">On this page</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
@@ -151,7 +151,7 @@ export default function CreatorGuidelines() {
         <Section id="getting-started" icon={Store} title="Getting started">
           <p>
             Sign up and choose <strong>Seller</strong> as your account type.
-            That creates your storefront — a public page where everything you
+            That creates your storefront â€” a public page where everything you
             sell lives, along with your bio, location and rating.
           </p>
           <p>
@@ -173,7 +173,7 @@ export default function CreatorGuidelines() {
         >
           <p>
             Online courses, digital products, beats and music, and live one-on-one
-            sessions — anything you have full rights to distribute.
+            sessions â€” anything you have full rights to distribute.
           </p>
           <p>
             If you didn't make it, you need written permission or a licence that
@@ -185,14 +185,14 @@ export default function CreatorGuidelines() {
 
         <Section id="courses" icon={BookOpen} title="Selling courses">
           <p>
-            From your Dashboard, open <strong>My Courses → New Course</strong>.
+            From your Dashboard, open <strong>My Courses â†’ New Course</strong>.
             Add a title, description, price, duration, level and category, and
             upload a thumbnail.
           </p>
           <p>
             After creating it, click <strong>Manage Lessons</strong> to add
             lessons one by one. Each lesson takes a title, a duration and a video
-            link — YouTube (unlisted), Vimeo or Google Drive all work.
+            link â€” YouTube (unlisted), Vimeo or Google Drive all work.
           </p>
           <p>
             Mark one or two lessons as a <strong>free preview</strong>. Buyers
@@ -209,7 +209,7 @@ export default function CreatorGuidelines() {
           title="Selling digital products"
         >
           <p>
-            Go to <strong>My Products → New Product</strong>. You upload two
+            Go to <strong>My Products â†’ New Product</strong>. You upload two
             files: a <strong>thumbnail</strong> that buyers see while browsing,
             and the <strong>product file</strong> they download after paying.
           </p>
@@ -238,7 +238,7 @@ export default function CreatorGuidelines() {
               return (
                 <div
                   key={pt.type}
-                  className="border border-border/60 rounded-xl p-4"
+                  className="border border-border/60 rounded-md p-4"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Icon className="h-4 w-4 text-primary flex-shrink-0" />
@@ -247,7 +247,7 @@ export default function CreatorGuidelines() {
                     </p>
                   </div>
                   <p className="text-sm mb-1">{pt.what}</p>
-                  <p className="text-sm text-muted-foreground/80">
+                  <p className="text-sm text-muted-foreground">
                     {pt.examples}
                   </p>
                 </div>
@@ -272,13 +272,13 @@ export default function CreatorGuidelines() {
             panel appears with two fields that matter:
           </p>
           <p>
-            <strong className="text-foreground">Preview clip</strong> — upload a
+            <strong className="text-foreground">Preview clip</strong> â€” upload a
             short, tagged or watermarked sample. Buyers can play this before
             paying; the full file stays private. Nobody buys a beat they haven't
             heard, so listings without a preview rarely sell.
           </p>
           <p>
-            <strong className="text-foreground">Licensing terms</strong> — spell
+            <strong className="text-foreground">Licensing terms</strong> â€” spell
             out exactly what the buyer is allowed to do. Be specific about
             exclusivity, stream or sale caps, whether credit is required, and
             whether commercial use is included. For example: "Non-exclusive
@@ -301,7 +301,7 @@ export default function CreatorGuidelines() {
           <p>
             This is how coaching, mentorship, consultation calls and gaming
             coaching are sold. Go to{" "}
-            <strong>Dashboard → Availability → New Slot</strong>.
+            <strong>Dashboard â†’ Availability â†’ New Slot</strong>.
           </p>
           <p>
             You publish <strong>specific times</strong>, not a general "I'm
@@ -311,7 +311,7 @@ export default function CreatorGuidelines() {
           </p>
           <p>
             Your <strong>call link is private</strong>. It's only revealed to the
-            buyer once they've paid — it never appears on public listings.
+            buyer once they've paid â€” it never appears on public listings.
           </p>
           <p>
             When someone adds your slot to their cart it's held for 20 minutes so
@@ -321,7 +321,7 @@ export default function CreatorGuidelines() {
           <p>
             After the session happens, mark it <strong>delivered</strong>. The
             buyer then confirms and your payment is released. If you need to
-            cancel a booked session, use Cancel and tell the buyer — they'll be
+            cancel a booked session, use Cancel and tell the buyer â€” they'll be
             refunded through support.
           </p>
         </Section>
@@ -334,7 +334,7 @@ export default function CreatorGuidelines() {
             listing limit:
           </p>
           <div className="not-prose overflow-x-auto">
-            <table className="w-full text-sm border border-border/60 rounded-lg">
+            <table className="w-full text-sm border border-border/60 rounded-md">
               <thead>
                 <tr className="bg-muted/50 text-foreground text-left">
                   <th className="p-2.5 font-semibold">Plan</th>
@@ -376,7 +376,7 @@ export default function CreatorGuidelines() {
 
         <Section id="payment" icon={Wallet} title="How you get paid">
           <p>
-            BizzHive holds the buyer's payment until delivery is settled — this
+            BizzHive holds the buyer's payment until delivery is settled â€” this
             is what makes buyers comfortable paying strangers, and it's the
             reason the marketplace works.
           </p>
@@ -384,7 +384,7 @@ export default function CreatorGuidelines() {
           <ol className="list-decimal pl-5 space-y-1.5">
             <li>Buyer pays. The money is held, not yet yours.</li>
             <li>
-              Buyer confirms they received what they paid for — or the hold
+              Buyer confirms they received what they paid for â€” or the hold
               expires on its own after a few days.
             </li>
             <li>
@@ -394,7 +394,7 @@ export default function CreatorGuidelines() {
           </ol>
           <p>
             You keep <strong>80%</strong> of each sale by default. You don't need
-            to chase anything — if the buyer goes quiet, the payment releases to
+            to chase anything â€” if the buyer goes quiet, the payment releases to
             you automatically once the deadline passes.
           </p>
           <p>
@@ -417,15 +417,15 @@ export default function CreatorGuidelines() {
           <p>We can resolve it three ways:</p>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>
-              <strong className="text-foreground">Release to you</strong> — you
+              <strong className="text-foreground">Release to you</strong> â€” you
               delivered what you promised.
             </li>
             <li>
-              <strong className="text-foreground">Refund the buyer</strong> —
+              <strong className="text-foreground">Refund the buyer</strong> â€”
               nothing was delivered.
             </li>
             <li>
-              <strong className="text-foreground">Split it</strong> — partly
+              <strong className="text-foreground">Split it</strong> â€” partly
               delivered, so the buyer is partly refunded and you're paid on the
               rest.
             </li>
@@ -446,14 +446,14 @@ export default function CreatorGuidelines() {
             itself. Ratings show on every listing, so they directly affect sales.
           </p>
           <p>
-            Open <strong>Dashboard → Reviews</strong> to see everything in one
+            Open <strong>Dashboard â†’ Reviews</strong> to see everything in one
             place, with a badge showing how many you haven't answered yet. You
             can post a public response to any of them.
           </p>
           <p>
             Respond to the critical ones especially. A calm, specific reply to a
             bad review reassures future buyers far more than the review itself
-            damages you. Don't argue — explain what happened and what you did
+            damages you. Don't argue â€” explain what happened and what you did
             about it.
           </p>
         </Section>
@@ -465,13 +465,13 @@ export default function CreatorGuidelines() {
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Pirated, stolen or resold content you don't have rights to</li>
             <li>
-              Misleading titles, thumbnails or descriptions — including
+              Misleading titles, thumbnails or descriptions â€” including
               screenshots that aren't from your actual product
             </li>
             <li>Counterfeit goods, or accounts and items you can't deliver</li>
             <li>Fake reviews, or asking buyers to leave reviews in exchange for anything</li>
             <li>
-              Taking buyers off-platform to avoid fees — it also removes their
+              Taking buyers off-platform to avoid fees â€” it also removes their
               payment protection, and yours
             </li>
             <li>Anything that breaks Ghanaian law</li>
@@ -480,7 +480,7 @@ export default function CreatorGuidelines() {
           <p className="font-medium text-foreground pt-2">Expected of you:</p>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Accurate thumbnails, descriptions and pricing</li>
-            <li>Working files and links — check them periodically</li>
+            <li>Working files and links â€” check them periodically</li>
             <li>Replies to buyer questions and reviews within a few days</li>
             <li>Showing up on time for sessions you've sold</li>
             <li>Keeping listings current, and unpublishing what you no longer offer</li>
@@ -500,7 +500,7 @@ export default function CreatorGuidelines() {
             <Link href="/contact" className="text-primary hover:underline">
               Contact page
             </Link>
-            . If you're signed in, your message is tagged with your plan — Pro
+            . If you're signed in, your message is tagged with your plan â€” Pro
             sellers are answered within one business day, Premium sellers within
             a few hours.
           </p>
@@ -511,7 +511,7 @@ export default function CreatorGuidelines() {
         </Section>
       </div>
 
-      <Card className="mt-12 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+      <Card className="mt-12 rounded-md shadow-none border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
         <CardContent className="p-6 text-center">
           <XCircle className="h-6 w-6 text-primary mx-auto mb-3" />
           <p className="font-semibold mb-1">Still not sure about something?</p>

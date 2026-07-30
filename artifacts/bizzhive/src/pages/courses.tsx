@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import { useListCourses, useListCategories } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,13 +40,14 @@ export default function Courses() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold mb-2">Online Courses</h1>
+        <span className="text-xs font-semibold uppercase tracking-wider text-primary">Browse</span>
+        <h1 className="text-3xl font-display font-bold mt-2 mb-2">Online Courses</h1>
         <p className="text-muted-foreground">
           Learn from Ghana's best creators and experts
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 rounded-md border border-border/70 bg-card p-4 shadow-none">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <input
@@ -54,7 +55,7 @@ export default function Courses() {
             placeholder="Search courses..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-muted rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full bg-muted rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <Select value={categoryId} onValueChange={setCategoryId}>
@@ -98,14 +99,14 @@ export default function Courses() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-80 rounded-xl" />
+            <Skeleton key={i} className="h-80 rounded-md" />
           ))}
         </div>
       ) : courses && courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
             <Link key={course.id} href={`/courses/${course.id}`}>
-              <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all border-border/60 hover:border-primary/30 h-full">
+              <Card className="group overflow-hidden cursor-pointer rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all h-full">
                 <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative">
                   {course.thumbnail ? (
                     <img
@@ -118,7 +119,7 @@ export default function Courses() {
                       <BookOpen className="h-12 w-12 text-primary/40" />
                     </div>
                   )}
-                  <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
+                  <Badge className="absolute top-3 left-3 rounded-sm">
                     {course.level}
                   </Badge>
                 </div>
@@ -146,7 +147,7 @@ export default function Courses() {
                       {course.lessonsCount} lessons
                     </span>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                  <div className="flex items-center justify-between pt-3 border-t border-border/60">
                     <span className="text-lg font-bold text-primary font-display">
                       GHS {course.price.toFixed(2)}
                     </span>
@@ -163,7 +164,7 @@ export default function Courses() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <BookOpen className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+          <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No courses found</h3>
           <p className="text-muted-foreground text-sm">
             Try adjusting your search or filters

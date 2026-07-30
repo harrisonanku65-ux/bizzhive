@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+﻿import { useParams } from "wouter";
 import { Link } from "wouter";
 import {
   useGetProduct,
@@ -53,7 +53,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <ShoppingBag className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Product not found</h2>
         <Link href="/products">
           <Button>Browse Products</Button>
@@ -109,7 +109,7 @@ export default function ProductDetail() {
     );
   };
 
-  // Audio listings get a preview player and their licensing terms surfaced —
+  // Audio listings get a preview player and their licensing terms surfaced â€”
   // buying a beat without hearing it first makes no sense.
   const isAudio = product.productType === "audio" || !!product.previewUrl;
 
@@ -118,10 +118,10 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <div className="mb-2">
-            <Badge variant="secondary" className="mr-2">
+            <Badge variant="secondary" className="mr-2 rounded-sm">
               {product.categoryName}
             </Badge>
-            <Badge>{product.productType}</Badge>
+            <Badge className="rounded-sm">{product.productType}</Badge>
           </div>
           <h1 className="text-3xl font-display font-bold mb-4">
             {product.title}
@@ -142,12 +142,12 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <div className="aspect-video bg-gradient-to-br from-secondary/20 to-primary/10 rounded-xl relative mb-8">
+          <div className="aspect-video bg-gradient-to-br from-secondary/20 to-primary/10 rounded-md relative mb-8">
             {product.thumbnail ? (
               <img
                 src={product.thumbnail}
                 alt={product.title}
-                className="w-full h-full object-cover rounded-xl"
+                className="w-full h-full object-cover rounded-md"
               />
             ) : (
               <div className="flex items-center justify-center h-full">
@@ -161,16 +161,16 @@ export default function ProductDetail() {
           </div>
 
           {product.previewUrl && (
-            <Card className="mb-8">
+            <Card className="mb-8 rounded-md shadow-none border-border/70">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <Music className="h-4 w-4 text-primary" />
                   <h2 className="font-semibold text-sm">Preview</h2>
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-xs rounded-sm">
                     Sample
                   </Badge>
                 </div>
-                {/* Preview only — the full file is delivered after purchase. */}
+                {/* Preview only â€” the full file is delivered after purchase. */}
                 <audio
                   controls
                   preload="none"
@@ -184,7 +184,7 @@ export default function ProductDetail() {
           )}
 
           {product.licenseTerms && (
-            <Card className="mb-8">
+            <Card className="mb-8 rounded-md shadow-none border-border/70">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="h-4 w-4 text-primary" />
@@ -216,7 +216,7 @@ export default function ProductDetail() {
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="sticky top-24">
+          <Card className="sticky top-24 rounded-md shadow-none border-border/70">
             <CardContent className="p-6">
               <div className="text-3xl font-bold text-primary font-display mb-4">
                 GHS {product.price.toFixed(2)}
@@ -233,7 +233,7 @@ export default function ProductDetail() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Button className="w-full mb-3 rounded-full" size="lg">
+                      <Button className="w-full mb-3 font-semibold" size="lg">
                         <Download className="mr-2 h-4 w-4" /> Download
                       </Button>
                     </a>
@@ -245,7 +245,7 @@ export default function ProductDetail() {
                 </>
               ) : (
                 <Button
-                  className="w-full mb-3 rounded-full"
+                  className="w-full mb-3 font-semibold"
                   size="lg"
                   onClick={handleAddToCart}
                   disabled={addToCart.isPending}

@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+﻿import { useParams } from "wouter";
 import { Link } from "wouter";
 import { useGetCourse, useListCourseReviews, useAddToCart, useCreateCourseReview, getGetCartQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,7 +36,7 @@ export default function CourseDetail() {
   if (!course) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <BookOpen className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Course not found</h2>
         <Link href="/courses"><Button>Browse Courses</Button></Link>
       </div>
@@ -66,8 +66,8 @@ export default function CourseDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <div className="mb-2">
-            <Badge variant="secondary" className="mr-2">{course.categoryName}</Badge>
-            <Badge>{course.level}</Badge>
+            <Badge variant="secondary" className="mr-2 rounded-sm">{course.categoryName}</Badge>
+            <Badge className="rounded-sm">{course.level}</Badge>
           </div>
           <h1 className="text-3xl font-display font-bold mb-4">{course.title}</h1>
           <p className="text-muted-foreground mb-6">{course.description}</p>
@@ -100,7 +100,7 @@ export default function CourseDetail() {
             <h2 className="text-xl font-display font-bold mb-4">Course Curriculum</h2>
             <div className="space-y-2">
               {course.lessons?.map((lesson, i) => (
-                <div key={lesson.id} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 transition-colors">
+                <div key={lesson.id} className="flex items-center gap-3 p-3 rounded-md border border-border/60 hover:border-primary/40 transition-colors">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium flex-shrink-0">
                     {i + 1}
                   </div>
@@ -111,7 +111,7 @@ export default function CourseDetail() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {lesson.duration && <span className="text-xs text-muted-foreground">{lesson.duration}</span>}
                     {lesson.isFree ? (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs rounded-sm">
                         <Play className="h-3 w-3 mr-1" /> Free
                       </Badge>
                     ) : (
@@ -134,14 +134,14 @@ export default function CourseDetail() {
             </div>
 
             {showReviewForm && (
-              <Card className="mb-6">
+              <Card className="mb-6 rounded-md shadow-none border-border/70">
                 <CardContent className="p-4 space-y-3">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Your Name</label>
                     <input
                       value={reviewName}
                       onChange={(e) => setReviewName(e.target.value)}
-                      className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
+                      className="w-full bg-muted rounded-md px-3 py-2 text-sm"
                       placeholder="Enter your name"
                     />
                   </div>
@@ -160,7 +160,7 @@ export default function CourseDetail() {
                     <textarea
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
-                      className="w-full bg-muted rounded-lg px-3 py-2 text-sm min-h-[80px]"
+                      className="w-full bg-muted rounded-md px-3 py-2 text-sm min-h-[80px]"
                       placeholder="Share your experience..."
                     />
                   </div>
@@ -174,12 +174,12 @@ export default function CourseDetail() {
             {reviews && reviews.length > 0 ? (
               <div className="space-y-4">
                 {reviews.map((review) => (
-                  <div key={review.id} className="p-4 border border-border/60 rounded-lg">
+                  <div key={review.id} className="p-4 border border-border/60 rounded-md">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-sm">{review.userName}</span>
                       <div className="flex gap-0.5">
                         {[1,2,3,4,5].map(r => (
-                          <Star key={r} className={`h-3.5 w-3.5 ${r <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/20'}`} />
+                          <Star key={r} className={`h-3.5 w-3.5 ${r <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'}`} />
                         ))}
                       </div>
                     </div>
@@ -194,8 +194,8 @@ export default function CourseDetail() {
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="sticky top-24">
-            <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-lg relative">
+          <Card className="sticky top-24 rounded-md shadow-none border-border/70">
+            <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-md relative">
               {course.thumbnail ? (
                 <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover rounded-t-lg" />
               ) : (
@@ -208,7 +208,7 @@ export default function CourseDetail() {
               <div className="text-3xl font-bold text-primary font-display mb-4">
                 GHS {course.price.toFixed(2)}
               </div>
-              <Button className="w-full mb-3 rounded-full" size="lg" onClick={handleAddToCart} disabled={addToCart.isPending}>
+              <Button className="w-full mb-3 font-semibold" size="lg" onClick={handleAddToCart} disabled={addToCart.isPending}>
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 {addToCart.isPending ? "Adding..." : "Add to Cart"}
               </Button>

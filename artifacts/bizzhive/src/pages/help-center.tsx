@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+﻿import { Link } from "wouter";
 
 export default function HelpCenter() {
   const faqs = [
@@ -27,14 +27,15 @@ export default function HelpCenter() {
       a: "Sellers add Mobile Money details in their dashboard. Once delivery is confirmed, their share is transferred to their MoMo account automatically.",
     },
     {
-      q: "I found a bug or issue — who do I contact?",
+      q: "I found a bug or issue â€” who do I contact?",
       a: "Reach out via the Contact Us page and we'll get back to you as soon as we can.",
     },
   ];
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <h1 className="text-3xl font-display font-bold mb-6">Help Center</h1>
+      <span className="text-xs font-semibold uppercase tracking-wider text-primary">Support</span>
+      <h1 className="text-3xl font-display font-bold mt-2 mb-6">Help Center</h1>
       <div className="space-y-6">
         {faqs.map((f, i) => (
           <div key={i}>

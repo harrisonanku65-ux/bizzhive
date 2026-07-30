@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "wouter";
 import {
   useListSessionSlots,
@@ -27,7 +27,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 
 /**
- * Browse and book one-on-one sessions — the buyer-facing surface for the
+ * Browse and book one-on-one sessions â€” the buyer-facing surface for the
  * Coaching & Mentorship, Consultation Calls and Gaming Coaching categories.
  */
 export default function Sessions() {
@@ -58,9 +58,9 @@ export default function Sessions() {
           setBookingId(null);
         },
         onError: () => {
-          // The most likely cause is a 409 — someone else grabbed the slot.
+          // The most likely cause is a 409 â€” someone else grabbed the slot.
           setError(
-            "That slot was just taken. Pick another time — the list has been refreshed.",
+            "That slot was just taken. Pick another time â€” the list has been refreshed.",
           );
           setBookingId(null);
           queryClient.invalidateQueries();
@@ -73,7 +73,7 @@ export default function Sessions() {
     <div>
       <section className="relative overflow-hidden bg-gradient-to-br from-secondary/10 via-background to-primary/10 py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+          <Badge className="mb-4 rounded-sm bg-primary/10 text-primary border-primary/20">
             Book a session
           </Badge>
           <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-4 flex items-center gap-3">
@@ -82,14 +82,14 @@ export default function Sessions() {
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
             Book a one-on-one slot with Ghanaian coaches, consultants and gaming
-            pros. Pay securely — your money is held until the session happens.
+            pros. Pay securely â€” your money is held until the session happens.
           </p>
         </div>
       </section>
 
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 rounded-md border border-border/70 bg-card p-4 shadow-none">
             <p className="text-sm text-muted-foreground">
               {slots?.length ?? 0} upcoming slot
               {slots?.length === 1 ? "" : "s"} available
@@ -110,7 +110,7 @@ export default function Sessions() {
           </div>
 
           {error && (
-            <div className="mb-6 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <div className="mb-6 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
               <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
@@ -119,12 +119,12 @@ export default function Sessions() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-48" />
+                <Skeleton key={i} className="h-48 rounded-md" />
               ))}
             </div>
           ) : !slots?.length ? (
             <div className="text-center py-16">
-              <CalendarClock className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+              <CalendarClock className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">
                 No sessions available right now
               </h3>
@@ -140,10 +140,10 @@ export default function Sessions() {
               {slots.map((slot: any) => (
                 <Card
                   key={slot.id}
-                  className="hover:border-primary/40 transition-all hover:shadow-md"
+                  className="rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all"
                 >
                   <CardContent className="p-6">
-                    <Badge variant="secondary" className="mb-3">
+                    <Badge variant="secondary" className="mb-3 rounded-sm">
                       {slot.categoryName}
                     </Badge>
                     <h3 className="font-semibold mb-1">{slot.title}</h3>
@@ -187,7 +187,6 @@ export default function Sessions() {
                       </p>
                       <Button
                         size="sm"
-                        className="rounded-full"
                         disabled={addToCart.isPending && bookingId === slot.id}
                         onClick={() => handleBook(slot.id)}
                       >
@@ -202,7 +201,7 @@ export default function Sessions() {
             </div>
           )}
 
-          <div className="mt-10 flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4">
+          <div className="mt-10 flex items-start gap-3 rounded-md border border-border/70 bg-card p-4">
             <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="font-medium">Reserved for 20 minutes</p>

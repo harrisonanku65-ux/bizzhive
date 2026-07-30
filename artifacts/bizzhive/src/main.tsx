@@ -1,6 +1,14 @@
 import { createRoot } from "react-dom/client";
+import { setBaseUrl } from "@workspace/api-client-react";
 import App from "./App";
 import "./index.css";
+
+// In local dev this stays unset — Vite's server.proxy forwards /api requests
+// to the local API server instead. In production there's no such proxy, so
+// the deployed frontend needs to know the API's real origin.
+if (import.meta.env.VITE_API_URL) {
+  setBaseUrl(import.meta.env.VITE_API_URL);
+}
 
 createRoot(document.getElementById("root")!).render(<App />);
 

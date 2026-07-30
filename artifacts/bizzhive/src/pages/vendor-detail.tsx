@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+﻿import { useParams } from "wouter";
 import { Link } from "wouter";
 import {
   useGetVendor,
@@ -99,7 +99,7 @@ export default function VendorDetail() {
   if (!vendor) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <Users className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Creator not found</h2>
         <Link href="/vendors"><Button>Browse Creators</Button></Link>
       </div>
@@ -108,7 +108,7 @@ export default function VendorDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-8 mb-8">
+      <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-border/60 rounded-md p-8 mb-8">
         <div className="flex flex-col md:flex-row items-start gap-6">
           <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary text-3xl font-bold font-display flex-shrink-0">
             {vendor.name.charAt(0)}
@@ -117,11 +117,11 @@ export default function VendorDetail() {
             <div className="flex items-center gap-2 mb-2">
               <h1 className="text-3xl font-display font-bold">{vendor.name}</h1>
               {vendor.verifiedSeller && (
-                <Badge className="bg-primary/10 text-primary border-primary/20">
+                <Badge className="bg-primary/10 text-primary border-primary/20 rounded-sm">
                   <CheckCircle className="h-3 w-3 mr-1" /> Verified Seller
                 </Badge>
               )}
-              {vendor.featured && <Badge className="bg-accent text-accent-foreground">Featured Creator</Badge>}
+              {vendor.featured && <Badge className="bg-accent text-accent-foreground rounded-sm">Featured Creator</Badge>}
             </div>
             {vendor.location && (
               <div className="flex items-center gap-1 text-muted-foreground mb-3">
@@ -156,12 +156,12 @@ export default function VendorDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((course) => (
                 <Link key={course.id} href={`/courses/${course.id}`}>
-                  <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all h-full">
+                  <Card className="group overflow-hidden cursor-pointer rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all h-full">
                     <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative">
                       <div className="flex items-center justify-center h-full">
                         <BookOpen className="h-12 w-12 text-primary/40" />
                       </div>
-                      <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">{course.level}</Badge>
+                      <Badge className="absolute top-3 left-3 rounded-sm">{course.level}</Badge>
                     </div>
                     <CardContent className="p-5">
                       <h3 className="font-semibold text-base mb-2 group-hover:text-primary transition-colors">{course.title}</h3>
@@ -178,7 +178,7 @@ export default function VendorDetail() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <BookOpen className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">No courses yet</p>
             </div>
           )}
@@ -189,12 +189,12 @@ export default function VendorDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link key={product.id} href={`/products/${product.id}`}>
-                  <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all h-full">
+                  <Card className="group overflow-hidden cursor-pointer rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all h-full">
                     <div className="aspect-[4/3] bg-gradient-to-br from-secondary/20 to-primary/10 relative">
                       <div className="flex items-center justify-center h-full">
                         <ShoppingBag className="h-10 w-10 text-primary/40" />
                       </div>
-                      <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground">{product.productType}</Badge>
+                      <Badge variant="secondary" className="absolute top-3 left-3 rounded-sm">{product.productType}</Badge>
                     </div>
                     <CardContent className="p-4">
                       <h3 className="font-semibold text-sm mb-2 group-hover:text-primary transition-colors">{product.title}</h3>
@@ -206,7 +206,7 @@ export default function VendorDetail() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <ShoppingBag className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">No products yet</p>
             </div>
           )}
@@ -214,16 +214,16 @@ export default function VendorDetail() {
 
         <TabsContent value="sessions">
           {slotError && (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
               {slotError}
             </div>
           )}
           {slots && slots.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {slots.map((slot: any) => (
-                <Card key={slot.id} className="h-full">
+                <Card key={slot.id} className="h-full rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all">
                   <CardContent className="p-5">
-                    <Badge variant="secondary" className="mb-3">
+                    <Badge variant="secondary" className="mb-3 rounded-sm">
                       {slot.categoryName}
                     </Badge>
                     <h3 className="font-semibold text-sm mb-2">{slot.title}</h3>
@@ -253,7 +253,6 @@ export default function VendorDetail() {
                       </span>
                       <Button
                         size="sm"
-                        className="rounded-full"
                         disabled={addToCart.isPending}
                         onClick={() => handleReserve(slot.id)}
                       >
@@ -266,7 +265,7 @@ export default function VendorDetail() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <CalendarClock className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <CalendarClock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">
                 No sessions available right now
               </p>

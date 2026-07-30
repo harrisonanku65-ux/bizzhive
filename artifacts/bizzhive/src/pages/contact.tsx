@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   useCreateSupportTicket,
   useGetSupportPriority,
@@ -81,19 +81,20 @@ export default function Contact() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <h1 className="text-3xl font-display font-bold mb-6">Contact Us</h1>
+      <span className="text-xs font-semibold uppercase tracking-wider text-primary">Support</span>
+      <h1 className="text-3xl font-display font-bold mt-2 mb-6">Contact Us</h1>
       <p className="text-muted-foreground mb-8">
         Have a question, ran into an issue, or need help with an order? Send us a
         message below, or reach out through either channel directly.
       </p>
 
       {priority?.priority === "priority" && (
-        <div className="mb-8 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+        <div className="mb-8 flex items-start gap-3 rounded-md border border-primary/30 bg-card p-4">
           <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="text-sm">
             <div className="flex items-center gap-2 mb-1">
               <p className="font-medium">Premium priority support</p>
-              <Badge className="bg-primary/10 text-primary border-primary/20">
+              <Badge className="rounded-sm bg-primary/10 text-primary border-primary/20">
                 Premium
               </Badge>
             </div>
@@ -106,7 +107,7 @@ export default function Contact() {
       )}
 
       {priority?.priority === "standard" && (
-        <div className="mb-8 flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4">
+        <div className="mb-8 flex items-start gap-3 rounded-md border border-border/70 bg-card p-4">
           <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-medium mb-1">Pro support</p>
@@ -118,7 +119,7 @@ export default function Contact() {
       )}
 
       {submitted ? (
-        <Card className="mb-8 border-green-200 bg-green-50/50">
+        <Card className="mb-8 rounded-md shadow-none border-green-200 bg-green-50/50">
           <CardContent className="p-6 flex items-start gap-3">
             <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
             <div>
@@ -129,7 +130,6 @@ export default function Contact() {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full"
                 onClick={() => setSubmitted(null)}
               >
                 Send another message
@@ -138,11 +138,11 @@ export default function Contact() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-8">
+        <Card className="mb-8 rounded-md shadow-none border-border/70">
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
                   <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -155,7 +155,7 @@ export default function Contact() {
                     required
                     value={name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
+                    className="w-full bg-muted rounded-md px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -165,14 +165,14 @@ export default function Contact() {
                     required
                     value={email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
+                    className="w-full bg-muted rounded-md px-3 py-2 text-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium block mb-1">I am…</label>
+                  <label className="text-sm font-medium block mb-1">I amâ€¦</label>
                   <Select
                     value={form.requesterRole}
                     onValueChange={(v) =>
@@ -184,10 +184,10 @@ export default function Contact() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="seller">
-                        A seller — I list services
+                        A seller â€” I list services
                       </SelectItem>
                       <SelectItem value="buyer">
-                        A buyer — I have a question
+                        A buyer â€” I have a question
                       </SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
@@ -203,7 +203,7 @@ export default function Contact() {
                       setForm({ ...form, subject: e.target.value })
                     }
                     placeholder="What's this about?"
-                    className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
+                    className="w-full bg-muted rounded-md px-3 py-2 text-sm"
                   />
                 </div>
               </div>
@@ -215,7 +215,7 @@ export default function Contact() {
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder="Tell us what's going on. If it's about an order, include the order number."
-                  className="w-full bg-muted rounded-lg px-3 py-2 text-sm min-h-[140px]"
+                  className="w-full bg-muted rounded-md px-3 py-2 text-sm min-h-[140px]"
                 />
               </div>
 
@@ -230,9 +230,9 @@ export default function Contact() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <a
           href="mailto:bizzhive001@gmail.com"
-          className="flex items-center gap-3 border border-border rounded-xl p-5 hover:border-primary/40 transition-colors"
+          className="flex items-center gap-3 border border-border/70 bg-card rounded-md p-5 hover:border-primary/40 hover:shadow-md transition-all"
         >
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Mail className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -246,9 +246,9 @@ export default function Contact() {
           href="https://wa.me/233559401561"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 border border-border rounded-xl p-5 hover:border-primary/40 transition-colors"
+          className="flex items-center gap-3 border border-border/70 bg-card rounded-md p-5 hover:border-primary/40 hover:shadow-md transition-all"
         >
-          <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
             <MessageCircle className="h-5 w-5 text-accent-foreground" />
           </div>
           <div>
