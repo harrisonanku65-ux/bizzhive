@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed": "tsx ./seed.js",
+    "seed-listings": "tsx ./seed-listings.js",
     "create-admin": "tsx ./create-admin.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
