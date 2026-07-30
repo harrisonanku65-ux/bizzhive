@@ -185,7 +185,7 @@ async function initFlutterwave(email: string, phone: string | undefined, amountG
       description: "BizzHive Marketplace Payment",
       logo: "https://bizzhive.com/logo.png",
     },
-    payment_options: "card,mobilemoneygm",
+    payment_options: "card,mobilemoneyghana",
   };
 
   const resp = await fetch("https://api.flutterwave.com/v3/payments", {
