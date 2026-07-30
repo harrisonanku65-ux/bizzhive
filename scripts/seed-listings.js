@@ -62,13 +62,15 @@ const COURSES = [
   { title: "Mobile Legends: Rank Up Fast", slug: "mobile-legends-rank-up-fast", description: "1-on-1 coaching to climb ranked faster — drafting, rotations, and macro play.", price: 120, level: "beginner", duration: "4 sessions", categorySlug: "gaming" },
 ];
 
+// productType is constrained by the OpenAPI spec to:
+// [ebook, template, software, asset, audio, other]
 const PRODUCTS = [
-  { title: "Afrobeat Drum Kit Vol. 1", slug: "afrobeat-drum-kit-vol-1", description: "40 royalty-free drum samples and one-shots for Afrobeat production.", price: 90, productType: "beat", categorySlug: "beats-music" },
-  { title: "Trap Beat Pack — Vol. 2", slug: "trap-beat-pack-vol-2", description: "10 licensed trap instrumentals, stems included.", price: 90, productType: "beat", categorySlug: "beats-music" },
+  { title: "Afrobeat Drum Kit Vol. 1", slug: "afrobeat-drum-kit-vol-1", description: "40 royalty-free drum samples and one-shots for Afrobeat production.", price: 90, productType: "audio", categorySlug: "beats-music" },
+  { title: "Trap Beat Pack — Vol. 2", slug: "trap-beat-pack-vol-2", description: "10 licensed trap instrumentals, stems included.", price: 90, productType: "audio", categorySlug: "beats-music" },
   { title: "Professional CV Template Pack", slug: "professional-cv-template-pack", description: "5 editable CV templates designed for the Ghanaian job market.", price: 45, productType: "template", categorySlug: "digital-templates" },
   { title: "Pitch Deck Template (Investor-Ready)", slug: "pitch-deck-template-investor-ready", description: "A 12-slide deck template used to raise pre-seed funding.", price: 60, productType: "template", categorySlug: "digital-templates" },
   { title: "Social Media Content Kit", slug: "social-media-content-kit", description: "50 editable post templates for Instagram and TikTok.", price: 35, productType: "template", categorySlug: "digital-templates" },
-  { title: "Free Fire Diamonds Top-Up Guide", slug: "free-fire-diamonds-top-up-guide", description: "A step-by-step guide to the fastest, safest way to top up.", price: 25, productType: "guide", categorySlug: "gaming" },
+  { title: "Free Fire Diamonds Top-Up Guide", slug: "free-fire-diamonds-top-up-guide", description: "A step-by-step guide to the fastest, safest way to top up.", price: 25, productType: "ebook", categorySlug: "gaming" },
 ];
 
 const { db, usersTable, categoriesTable, coursesTable, productsTable } = await import("@workspace/db");
