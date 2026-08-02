@@ -9,22 +9,22 @@ export default function Vendors() {
   const { data: vendors, isLoading } = useListVendors();
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="theme-analogue min-h-screen bg-background container mx-auto px-4 py-8">
       <div className="mb-8">
-        <span className="text-xs font-semibold uppercase tracking-wider text-primary">Community</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Community</span>
         <h1 className="text-3xl font-display font-bold mt-2 mb-2">Creators</h1>
         <p className="text-muted-foreground">Meet the talented creators powering BizzHive</p>
       </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1,2,3].map(i => <Skeleton key={i} className="h-64 rounded-md" />)}
+          {[1,2,3].map(i => <Skeleton key={i} className="h-64 rounded-[17.6px]" />)}
         </div>
       ) : vendors && vendors.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {vendors.map((vendor) => (
             <Link key={vendor.id} href={`/vendors/${vendor.id}`}>
-              <Card className="group cursor-pointer rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all h-full">
+              <Card className="group cursor-pointer rounded-[17.6px] shadow-none border-border/70 hover:border-primary/40 transition-all h-full">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold font-display flex-shrink-0">
@@ -33,7 +33,7 @@ export default function Vendors() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{vendor.name}</h3>
-                        {vendor.featured && <Badge className="bg-accent text-accent-foreground text-xs rounded-sm">Featured</Badge>}
+                        {vendor.featured && <Badge className="bg-accent text-accent-foreground text-xs rounded-full">Featured</Badge>}
                       </div>
                       {vendor.location && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">

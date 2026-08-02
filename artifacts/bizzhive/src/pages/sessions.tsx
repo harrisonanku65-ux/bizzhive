@@ -70,10 +70,10 @@ export default function Sessions() {
   };
 
   return (
-    <div>
-      <section className="relative overflow-hidden bg-gradient-to-br from-secondary/10 via-background to-primary/10 py-16 md:py-20">
+    <div className="theme-analogue min-h-screen bg-background">
+      <section className="relative overflow-hidden bg-background py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <Badge className="mb-4 rounded-sm bg-primary/10 text-primary border-primary/20">
+          <Badge className="mb-4 rounded-full" variant="secondary">
             Book a session
           </Badge>
           <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-4 flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function Sessions() {
 
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 rounded-md border border-border/70 bg-card p-4 shadow-none">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 rounded-[17.6px] border border-border/70 bg-card p-4 shadow-none">
             <p className="text-sm text-muted-foreground">
               {slots?.length ?? 0} upcoming slot
               {slots?.length === 1 ? "" : "s"} available
@@ -119,7 +119,7 @@ export default function Sessions() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-48 rounded-md" />
+                <Skeleton key={i} className="h-48 rounded-[17.6px]" />
               ))}
             </div>
           ) : !slots?.length ? (
@@ -140,10 +140,10 @@ export default function Sessions() {
               {slots.map((slot: any) => (
                 <Card
                   key={slot.id}
-                  className="rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all"
+                  className="rounded-[17.6px] shadow-none border-border/70 hover:border-primary/40 transition-all"
                 >
                   <CardContent className="p-6">
-                    <Badge variant="secondary" className="mb-3 rounded-sm">
+                    <Badge variant="secondary" className="mb-3 rounded-full">
                       {slot.categoryName}
                     </Badge>
                     <h3 className="font-semibold mb-1">{slot.title}</h3>
@@ -201,7 +201,7 @@ export default function Sessions() {
             </div>
           )}
 
-          <div className="mt-10 flex items-start gap-3 rounded-md border border-border/70 bg-card p-4">
+          <div className="mt-10 flex items-start gap-3 rounded-[17.6px] border border-border/70 bg-card p-4">
             <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="font-medium">Reserved for 20 minutes</p>

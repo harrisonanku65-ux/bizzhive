@@ -438,5 +438,61 @@
   letter-spacing: -0.02em;
 }
 
+/* ------------------------------------------------------------------
+   Analogue (Refero) — scoped to the marketplace browse pages (Courses,
+   Digital Products, Creators, Book a Session). Black-gallery monochrome:
+   pure black canvas, white/smoke/iron-gray text only, hairline borders
+   instead of shadows, pill buttons/inputs, no gradients or tinted fills.
+   Source: https://styles.refero.design/style/98ab0172-9474-43b5-9055-98cf1a6a2401
+   ------------------------------------------------------------------ */
+.theme-analogue {
+  --background: 0 0% 0%;              /* #000000 carbon canvas */
+  --foreground: 0 0% 100%;            /* #ffffff bone white */
+
+  --border: 0 0% 100% / 0.14;         /* low-opacity white hairline, not a shadow */
+  --input: 0 0% 100% / 0.14;
+  --ring: 0 0% 100% / 0.35;
+
+  --card: 0 0% 0%;                    /* cards stay carbon black; hairline is the only separation */
+  --card-foreground: 0 0% 100%;
+  --card-border: 0 0% 100% / 0.14;
+
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+  --popover-border: 0 0% 100% / 0.14;
+
+  --primary: 0 0% 100%;               /* white — the single filled pill surface */
+  --primary-foreground: 0 0% 0%;
+
+  --secondary: 0 0% 100% / 0.08;      /* faint white wash — no second color competes */
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 0 0% 100% / 0.06;
+  --muted-foreground: 0 0% 75%;       /* #bfbfbf smoke */
+
+  --accent: 0 0% 100% / 0.08;
+  --accent-foreground: 0 0% 100%;
+
+  --button-outline: rgba(255, 255, 255, 0.16);
+  --badge-outline: rgba(255, 255, 255, 0.16);
+
+  --app-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --app-font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Buttons and select triggers become full pills; card/container radius
+   is set explicitly per-element (rounded-[17.6px]) since it must stay
+   smaller than the pill radius rather than derive from one shared scale. */
+.theme-analogue button {
+  border-radius: 9999px;
+}
+
+.theme-analogue h1 {
+  letter-spacing: -0.02em;
+}
+
 /* Nav and buttons use Poppins, matching --nav-font on the live site. */
 nav, .font-nav, button { font-family: 'Poppins', var(--app-font-sans); }

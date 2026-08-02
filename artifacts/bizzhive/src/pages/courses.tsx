@@ -38,16 +38,16 @@ export default function Courses() {
   const { data: categories } = useListCategories();
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="theme-analogue min-h-screen bg-background container mx-auto px-4 py-8">
       <div className="mb-8">
-        <span className="text-xs font-semibold uppercase tracking-wider text-primary">Browse</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Browse</span>
         <h1 className="text-3xl font-display font-bold mt-2 mb-2">Online Courses</h1>
         <p className="text-muted-foreground">
           Learn from Ghana's best creators and experts
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8 rounded-md border border-border/70 bg-card p-4 shadow-none">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 rounded-[17.6px] border border-border/70 bg-card p-4 shadow-none">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <input
@@ -55,7 +55,7 @@ export default function Courses() {
             placeholder="Search courses..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-muted rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full bg-muted rounded-full pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <Select value={categoryId} onValueChange={setCategoryId}>
@@ -99,15 +99,15 @@ export default function Courses() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-80 rounded-md" />
+            <Skeleton key={i} className="h-80 rounded-[17.6px]" />
           ))}
         </div>
       ) : courses && courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
             <Link key={course.id} href={`/courses/${course.id}`}>
-              <Card className="group overflow-hidden cursor-pointer rounded-md shadow-none border-border/70 hover:border-primary/40 hover:shadow-md transition-all h-full">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative">
+              <Card className="group overflow-hidden cursor-pointer rounded-[17.6px] shadow-none border-border/70 hover:border-primary/40 transition-all h-full">
+                <div className="aspect-video bg-muted relative">
                   {course.thumbnail ? (
                     <img
                       src={course.thumbnail}
@@ -119,7 +119,7 @@ export default function Courses() {
                       <BookOpen className="h-12 w-12 text-primary/40" />
                     </div>
                   )}
-                  <Badge className="absolute top-3 left-3 rounded-sm">
+                  <Badge className="absolute top-3 left-3 rounded-full">
                     {course.level}
                   </Badge>
                 </div>
