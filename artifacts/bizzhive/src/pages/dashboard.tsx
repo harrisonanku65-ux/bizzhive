@@ -1534,6 +1534,7 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="analytics">
+        <div className="theme-refero-ui rounded-3xl p-6">
           {/* Lifetime totals — shown on every plan. */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <Card>
@@ -1567,10 +1568,10 @@ export default function Dashboard() {
           {/* Free plan: locked state with a clear upsell rather than silently
               showing paid features to everyone. */}
           {analytics?.locked ? (
-            <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5 mb-8">
+            <Card className="mb-8">
               <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <Lock className="h-6 w-6 text-primary" />
+                <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <Lock className="h-6 w-6 text-foreground" />
                 </div>
                 <h3 className="font-semibold mb-2">
                   Sales analytics are a Pro feature
@@ -1579,7 +1580,6 @@ export default function Dashboard() {
                   {analytics.upgradeMessage}
                 </p>
                 <Button
-                  className="rounded-full"
                   disabled={subscribeVendor.isPending}
                   onClick={() => handleUpgrade("pro")}
                 >
@@ -1683,9 +1683,7 @@ export default function Dashboard() {
                     <h2 className="text-lg font-semibold">
                       Advanced analytics
                     </h2>
-                    <Badge className="bg-primary/10 text-primary border-primary/20">
-                      Premium
-                    </Badge>
+                    <Badge>Premium</Badge>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card>
@@ -1740,11 +1738,11 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5 mb-8">
+                <Card className="mb-8">
                   <CardContent className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <Lock className="h-4 w-4 text-primary" />
+                        <Lock className="h-4 w-4 text-foreground" />
                         <p className="font-medium text-sm">
                           Advanced analytics
                         </p>
@@ -1754,7 +1752,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <Button
-                      className="rounded-full flex-shrink-0"
+                      className="flex-shrink-0"
                       disabled={subscribeVendor.isPending}
                       onClick={() => handleUpgrade("premium")}
                     >
@@ -1806,6 +1804,7 @@ export default function Dashboard() {
               </Card>
             ))}
           </div>
+        </div>
         </TabsContent>
       </Tabs>
     </div>

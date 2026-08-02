@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -380,6 +380,62 @@
 @media (prefers-reduced-motion: reduce) {
   .card-lift { transition: none; }
   .card-lift:hover { transform: none; }
+}
+
+/* ------------------------------------------------------------------
+   Refero "Ui" (shadcn/ui monochrome) preset — scoped to the vendor
+   dashboard's Analytics tab only. Redefines the same token set the
+   rest of the app reads (--card, --primary, --radius, etc.) inside
+   this class, so shared components (Card, Button, Badge) render in
+   the achromatic style without any brand-gold leaking in elsewhere.
+   Source: https://styles.refero.design/style/0fd67ec5-7e9c-4ca9-b368-5d9c7388477a
+   ------------------------------------------------------------------ */
+.theme-refero-ui {
+  --background: 0 0% 96.1%;        /* #f5f5f5 canvas */
+  --foreground: 0 0% 3.9%;         /* #0a0a0a ink */
+
+  --border: 0 0% 89.8%;            /* #e5e5e5 hairline */
+  --input: 0 0% 89.8%;
+  --ring: 0 0% 89.8%;
+
+  --card: 0 0% 100%;               /* #ffffff paper */
+  --card-foreground: 0 0% 3.9%;
+  --card-border: 0 0% 89.8%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --popover-border: 0 0% 89.8%;
+
+  --primary: 0 0% 3.9%;            /* #0a0a0a — filled button fill */
+  --primary-foreground: 0 0% 98%;  /* #fafafa */
+
+  --secondary: 0 0% 96.1%;         /* #f5f5f5 — ghost button fill */
+  --secondary-foreground: 0 0% 3.9%;
+
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;  /* #737373 */
+
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 3.9%;
+
+  --destructive: 357 100% 45%;     /* #e7000b ember — errors only */
+  --destructive-foreground: 0 0% 100%;
+
+  --app-font-sans: 'Geist', 'Inter', system-ui, sans-serif;
+  --app-font-display: 'Geist', 'Inter', system-ui, sans-serif;
+
+  /* Base unit chosen so the shared radius scale lands on Refero's
+     named values: radius-md (buttons/badges) = 18px, radius-xl
+     (cards, via Card's rounded-xl) = 24px. */
+  --radius: 20px;
+
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.theme-refero-ui h2,
+.theme-refero-ui h3 {
+  letter-spacing: -0.02em;
 }
 
 /* Nav and buttons use Poppins, matching --nav-font on the live site. */
