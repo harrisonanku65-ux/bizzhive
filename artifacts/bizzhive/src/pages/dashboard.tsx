@@ -136,6 +136,8 @@ export default function Dashboard() {
   );
   const [uploadingCourseThumbnail, setUploadingCourseThumbnail] =
     useState(false);
+  const [courseError, setCourseError] = useState<string | null>(null);
+  const [productError, setProductError] = useState<string | null>(null);
   const [productForm, setProductForm] = useState({
     title: "",
     description: "",
@@ -219,13 +221,16 @@ export default function Dashboard() {
   };
 
   const handleCreateCourse = async () => {
+    setCourseError(null);
     if (
       !courseForm.title ||
       !courseForm.price ||
       !courseForm.categoryId ||
       !vendorId
-    )
+    ) {
+      setCourseError("Title, price and category are all required.");
       return;
+    }
 
     let thumbnailUrl: string | undefined;
     if (courseThumbnailFile) {
@@ -234,6 +239,7 @@ export default function Dashboard() {
         thumbnailUrl = await uploadFile(courseThumbnailFile);
       } catch {
         setUploadingCourseThumbnail(false);
+        setCourseError("We couldn't upload that thumbnail. Please try again.");
         return;
       }
       setUploadingCourseThumbnail(false);
@@ -266,6 +272,12 @@ export default function Dashboard() {
           });
           setCourseThumbnailFile(null);
         },
+        onError: (err: any) =>
+          setCourseError(
+            err?.status === 403
+              ? "You've hit your plan's active listing limit. Upgrade to publish more courses."
+              : "We couldn't publish that course. Please try again.",
+          ),
       },
     );
   };
@@ -299,13 +311,16 @@ export default function Dashboard() {
   };
 
   const handleCreateProduct = async () => {
+    setProductError(null);
     if (
       !productForm.title ||
       !productForm.price ||
       !productForm.categoryId ||
       !vendorId
-    )
+    ) {
+      setProductError("Title, price and category are all required.");
       return;
+    }
 
     setUploadingProduct(true);
     let thumbnailUrl: string | undefined;
@@ -318,6 +333,7 @@ export default function Dashboard() {
       if (productPreviewFile) previewUrl = await uploadFile(productPreviewFile);
     } catch {
       setUploadingProduct(false);
+      setProductError("We couldn't upload one of those files. Please try again.");
       return;
     }
     setUploadingProduct(false);
@@ -357,6 +373,12 @@ export default function Dashboard() {
           setProductContentFile(null);
           setProductPreviewFile(null);
         },
+        onError: (err: any) =>
+          setProductError(
+            err?.status === 403
+              ? "You've hit your plan's active listing limit. Upgrade to publish more products."
+              : "We couldn't publish that product. Please try again.",
+          ),
       },
     );
   };
@@ -644,6 +666,11 @@ export default function Dashboard() {
                   <DialogTitle>Create New Course</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
+                  {courseError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                      {courseError}
+                    </div>
+                  )}
                   <div>
                     <label className="text-sm font-medium block mb-1">
                       Course Thumbnail
@@ -935,6 +962,11 @@ export default function Dashboard() {
                   <DialogTitle>Create New Product</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
+                  {productError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                      {productError}
+                    </div>
+                  )}
                   <input
                     placeholder="Product Title"
                     value={productForm.title}
