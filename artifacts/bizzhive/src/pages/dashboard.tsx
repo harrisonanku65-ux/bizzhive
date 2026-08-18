@@ -143,6 +143,7 @@ export default function Dashboard() {
     productType: "ebook",
     categoryId: "",
     licenseTerms: "",
+    credentials: "",
   });
   const [productPreviewFile, setProductPreviewFile] = useState<File | null>(null);
 
@@ -334,6 +335,7 @@ export default function Dashboard() {
           fileUrl,
           previewUrl,
           licenseTerms: productForm.licenseTerms || undefined,
+          credentials: productForm.credentials || undefined,
         },
       },
       {
@@ -349,6 +351,7 @@ export default function Dashboard() {
             productType: "ebook",
             categoryId: "",
             licenseTerms: "",
+            credentials: "",
           });
           setProductThumbnailFile(null);
           setProductContentFile(null);
@@ -1024,6 +1027,29 @@ export default function Dashboard() {
                       }
                       className="w-full text-sm"
                     />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 flex items-center gap-1.5">
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                      Account credentials (optional)
+                    </label>
+                    <textarea
+                      placeholder="e.g. Login email, password, and any recovery/2FA notes the buyer needs. Leave blank if this isn't an account listing."
+                      value={productForm.credentials}
+                      onChange={(e) =>
+                        setProductForm({
+                          ...productForm,
+                          credentials: e.target.value,
+                        })
+                      }
+                      className="w-full bg-muted rounded-lg px-3 py-2 text-sm min-h-[70px]"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Encrypted and only revealed to the buyer after payment —
+                      use this for game accounts and similar listings instead
+                      of putting credentials in the uploaded file.
+                    </p>
                   </div>
 
                   {isAudioProduct && (

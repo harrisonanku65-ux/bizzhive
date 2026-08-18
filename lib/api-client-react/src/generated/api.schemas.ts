@@ -347,6 +347,13 @@ export interface Product {
   productType: ProductProductType;
   /** @nullable */
   fileUrl?: string | null;
+  /** Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself. */
+  hasCredentials: boolean;
+  /**
+   * Decrypted account login/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.
+   * @nullable
+   */
+  credentials?: string | null;
   /** @nullable */
   previewUrl?: string | null;
   /** @nullable */
@@ -385,6 +392,8 @@ export interface CreateProductBody {
   currency?: string;
   productType: CreateProductBodyProductType;
   fileUrl?: string;
+  /** Plaintext account login/credentials to deliver to the buyer after purchase (e.g. game account username/password). Encrypted server-side before storage; never returned as plaintext except to a buyer who has purchased. */
+  credentials?: string;
   /** Streamable preview clip — used for audio/beat listings. */
   previewUrl?: string;
   /** Licensing terms the buyer agrees to (audio/beat listings). */
@@ -413,6 +422,8 @@ export interface UpdateProductBody {
   currency?: string;
   productType?: UpdateProductBodyProductType;
   fileUrl?: string;
+  /** Plaintext account login/credentials to deliver to the buyer after purchase. Encrypted server-side before storage. */
+  credentials?: string;
   /** Streamable preview clip — used for audio/beat listings. */
   previewUrl?: string;
   /** Licensing terms the buyer agrees to (audio/beat listings). */

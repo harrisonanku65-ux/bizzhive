@@ -1996,6 +1996,12 @@ components:
           enum: [ebook, template, software, asset, audio, other]
         fileUrl:
           type: ["string", "null"]
+        hasCredentials:
+          type: boolean
+          description: Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself.
+        credentials:
+          type: ["string", "null"]
+          description: Decrypted account login/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.
         previewUrl:
           type: ["string", "null"]
         licenseTerms:
@@ -2032,6 +2038,7 @@ components:
           price,
           currency,
           productType,
+          hasCredentials,
           rating,
           reviewsCount,
           salesCount,
@@ -2062,6 +2069,9 @@ components:
           enum: [ebook, template, software, asset, audio, other]
         fileUrl:
           type: string
+        credentials:
+          type: string
+          description: Plaintext account login/credentials to deliver to the buyer after purchase (e.g. game account username/password). Encrypted server-side before storage; never returned as plaintext except to a buyer who has purchased.
         previewUrl:
           type: string
           description: Streamable preview clip — used for audio/beat listings.
@@ -2092,6 +2102,9 @@ components:
           enum: [ebook, template, software, asset, audio, other]
         fileUrl:
           type: string
+        credentials:
+          type: string
+          description: Plaintext account login/credentials to deliver to the buyer after purchase. Encrypted server-side before storage.
         previewUrl:
           type: string
           description: Streamable preview clip — used for audio/beat listings.

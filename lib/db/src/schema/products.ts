@@ -15,6 +15,11 @@ export const productsTable = pgTable("products", {
   productType: text("product_type").notNull().default("other"),
   fileUrl: text("file_url"),
 
+  // Encrypted account login/credentials (e.g. for game account listings) —
+  // ciphertext only, see lib/credentialsCrypto.ts. Buyer-gated like fileUrl,
+  // never returned in list responses regardless of purchase status.
+  credentials: text("credentials"),
+
   // Audio/music listings: a short streamable preview shown before purchase, and
   // the licensing terms the buyer is agreeing to. Required for the "Beats &
   // Music" category, where buying without hearing it first makes no sense.

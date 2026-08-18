@@ -20,6 +20,13 @@ export interface Product {
   productType: ProductProductType;
   /** @nullable */
   fileUrl?: string | null;
+  /** Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself. */
+  hasCredentials: boolean;
+  /**
+   * Decrypted account login/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.
+   * @nullable
+   */
+  credentials?: string | null;
   /** @nullable */
   previewUrl?: string | null;
   /** @nullable */

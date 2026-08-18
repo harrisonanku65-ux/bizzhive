@@ -23,6 +23,7 @@ import {
   Download,
   Music,
   FileText,
+  KeyRound,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -237,10 +238,25 @@ export default function ProductDetail() {
                         <Download className="mr-2 h-4 w-4" /> Download
                       </Button>
                     </a>
-                  ) : (
+                  ) : !product.hasCredentials ? (
                     <p className="text-sm text-muted-foreground mb-3">
                       No file has been uploaded for this product yet.
                     </p>
+                  ) : null}
+                  {product.credentials && (
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-3">
+                      <p className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                        <KeyRound className="h-3.5 w-3.5 text-primary" />
+                        Your account credentials
+                      </p>
+                      <p className="text-sm whitespace-pre-wrap break-words">
+                        {product.credentials}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Keep this private. Change the password after you take
+                        over the account.
+                      </p>
+                    </div>
                   )}
                 </>
               ) : (

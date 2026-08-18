@@ -15,6 +15,8 @@ export interface CreateProductBody {
   currency?: string;
   productType: CreateProductBodyProductType;
   fileUrl?: string;
+  /** Plaintext account login/credentials to deliver to the buyer after purchase (e.g. game account username/password). Encrypted server-side before storage; never returned as plaintext except to a buyer who has purchased. */
+  credentials?: string;
   /** Streamable preview clip — used for audio/beat listings. */
   previewUrl?: string;
   /** Licensing terms the buyer agrees to (audio/beat listings). */

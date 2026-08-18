@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Star, ShoppingBag, Search } from "lucide-react";
+import { Star, ShoppingBag, Search, Lock } from "lucide-react";
 
 export default function Products() {
   // Seed from ?search= so the navbar search (and shared links) land on a
@@ -132,8 +132,13 @@ export default function Products() {
                   <h3 className="font-semibold text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors">
                     {product.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground mb-2">
+                  <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                     {product.vendorName}
+                    {product.hasCredentials && (
+                      <span className="inline-flex items-center gap-0.5 text-primary" title="Includes account login credentials">
+                        <Lock className="h-3 w-3" /> account
+                      </span>
+                    )}
                   </p>
                   <div className="flex items-center gap-2 mb-2">
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />

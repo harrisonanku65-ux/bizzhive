@@ -15,6 +15,8 @@ export interface UpdateProductBody {
   currency?: string;
   productType?: UpdateProductBodyProductType;
   fileUrl?: string;
+  /** Plaintext account login/credentials to deliver to the buyer after purchase. Encrypted server-side before storage. */
+  credentials?: string;
   /** Streamable preview clip — used for audio/beat listings. */
   previewUrl?: string;
   /** Licensing terms the buyer agrees to (audio/beat listings). */

@@ -437,6 +437,17 @@ export const ListProductsResponseItem = zod.object({
     "other",
   ]),
   fileUrl: zod.string().nullish(),
+  hasCredentials: zod
+    .boolean()
+    .describe(
+      "Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself.",
+    ),
+  credentials: zod
+    .string()
+    .nullish()
+    .describe(
+      "Decrypted account login\/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.",
+    ),
   previewUrl: zod.string().nullish(),
   licenseTerms: zod.string().nullish(),
   rating: zod.number(),
@@ -471,6 +482,12 @@ export const CreateProductBody = zod.object({
     "other",
   ]),
   fileUrl: zod.string().optional(),
+  credentials: zod
+    .string()
+    .optional()
+    .describe(
+      "Plaintext account login\/credentials to deliver to the buyer after purchase (e.g. game account username\/password). Encrypted server-side before storage; never returned as plaintext except to a buyer who has purchased.",
+    ),
   previewUrl: zod
     .string()
     .optional()
@@ -507,6 +524,17 @@ export const GetProductResponse = zod.object({
     "other",
   ]),
   fileUrl: zod.string().nullish(),
+  hasCredentials: zod
+    .boolean()
+    .describe(
+      "Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself.",
+    ),
+  credentials: zod
+    .string()
+    .nullish()
+    .describe(
+      "Decrypted account login\/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.",
+    ),
   previewUrl: zod.string().nullish(),
   licenseTerms: zod.string().nullish(),
   rating: zod.number(),
@@ -539,6 +567,12 @@ export const UpdateProductBody = zod.object({
     .enum(["ebook", "template", "software", "asset", "audio", "other"])
     .optional(),
   fileUrl: zod.string().optional(),
+  credentials: zod
+    .string()
+    .optional()
+    .describe(
+      "Plaintext account login\/credentials to deliver to the buyer after purchase. Encrypted server-side before storage.",
+    ),
   previewUrl: zod
     .string()
     .optional()
@@ -569,6 +603,17 @@ export const UpdateProductResponse = zod.object({
     "other",
   ]),
   fileUrl: zod.string().nullish(),
+  hasCredentials: zod
+    .boolean()
+    .describe(
+      "Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself.",
+    ),
+  credentials: zod
+    .string()
+    .nullish()
+    .describe(
+      "Decrypted account login\/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.",
+    ),
   previewUrl: zod.string().nullish(),
   licenseTerms: zod.string().nullish(),
   rating: zod.number(),
@@ -1500,6 +1545,17 @@ export const GetFeaturedContentResponse = zod.object({
         "other",
       ]),
       fileUrl: zod.string().nullish(),
+      hasCredentials: zod
+        .boolean()
+        .describe(
+          "Whether this listing includes account login credentials (e.g. a game account) — always safe to expose, unlike the credentials value itself.",
+        ),
+      credentials: zod
+        .string()
+        .nullish()
+        .describe(
+          "Decrypted account login\/credentials. Only ever non-null in the single-product response, and only for a viewer who has purchased — never included in list responses.",
+        ),
       previewUrl: zod.string().nullish(),
       licenseTerms: zod.string().nullish(),
       rating: zod.number(),

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, productsTable, vendorsTable, categoriesTable } from "@workspace/db";
-import { eq, sql, ilike, and, desc, asc } from "drizzle-orm";
+import { eq, sql, ilike, and, desc, asc, isNotNull } from "drizzle-orm";
 import {
   ListProductsQueryParams,
   ListProductsResponse,
@@ -15,6 +15,7 @@ import {
 import { requireOwnVendorId } from "../middlewares/requireVendor";
 import { countActiveListings, listingLimitForPlan } from "../lib/listingLimits";
 import { getViewerSessionId, hasPurchased } from "../lib/purchases";
+import { encryptCredentials, decryptCredentials } from "../lib/credentialsCrypto";
 
 const router: IRouter = Router();
 
@@ -51,7 +52,10 @@ router.get("/products", async (req, res): Promise<void> => {
       price: productsTable.price,
       currency: productsTable.currency,
       productType: productsTable.productType,
-      fileUrl: productsTable.fileUrl,
+      // The list view never exposes buyer-only values (the download link,
+      // whether credentials exist) — those are gated to the single-product
+      // response so only someone who has actually paid can reach them.
+      hasCredentials: isNotNull(productsTable.credentials),
       previewUrl: productsTable.previewUrl,
       licenseTerms: productsTable.licenseTerms,
       rating: productsTable.rating,
@@ -72,7 +76,7 @@ router.get("/products", async (req, res): Promise<void> => {
     .where(filters.length > 0 ? and(...filters) : undefined)
     .orderBy(desc(sql<number>`CASE WHEN ${vendorsTable.plan} = 'premium' THEN 2 WHEN ${vendorsTable.plan} = 'pro' THEN 1 ELSE 0 END`), orderBy);
 
-  res.json(ListProductsResponse.parse(products));
+  res.json(ListProductsResponse.parse(products.map((p) => ({ ...p, fileUrl: null, credentials: null }))));
 });
 
 router.post("/products", async (req, res): Promise<void> => {
@@ -95,16 +99,20 @@ router.post("/products", async (req, res): Promise<void> => {
   }
 
   const slug = parsed.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
+  const { credentials: plaintextCredentials, ...rest } = parsed.data;
   const [product] = await db.insert(productsTable).values({
-    ...parsed.data,
+    ...rest,
     slug,
     currency: parsed.data.currency ?? "GHS",
+    credentials: plaintextCredentials ? encryptCredentials(plaintextCredentials) : null,
   }).returning();
 
   const [category] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, product.categoryId));
 
   res.status(201).json({
     ...product,
+    hasCredentials: product.credentials !== null,
+    credentials: null,
     vendorName: existingVendor?.name ?? "",
     vendorAvatar: existingVendor?.avatar ?? null,
     categoryName: category?.name ?? "",
@@ -129,6 +137,7 @@ router.get("/products/:id", async (req, res): Promise<void> => {
       currency: productsTable.currency,
       productType: productsTable.productType,
       fileUrl: productsTable.fileUrl,
+      credentials: productsTable.credentials,
       previewUrl: productsTable.previewUrl,
       licenseTerms: productsTable.licenseTerms,
       rating: productsTable.rating,
@@ -153,12 +162,18 @@ router.get("/products/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  // The downloadable file is only for buyers — previewUrl (audio samples etc.)
-  // stays public, that's the point of a preview.
+  // The downloadable file and account credentials are only for buyers —
+  // previewUrl (audio samples etc.) stays public, that's the point of a preview.
   const sessionId = getViewerSessionId(req);
   const purchased = sessionId ? await hasPurchased(sessionId, "product", product.id) : false;
+  const hasCredentials = product.credentials !== null;
 
-  res.json(GetProductResponse.parse({ ...product, fileUrl: purchased ? product.fileUrl : null }));
+  res.json(GetProductResponse.parse({
+    ...product,
+    fileUrl: purchased ? product.fileUrl : null,
+    hasCredentials,
+    credentials: purchased && product.credentials ? decryptCredentials(product.credentials) : null,
+  }));
 });
 
 router.patch("/products/:id", async (req, res): Promise<void> => {
@@ -174,9 +189,15 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
     return;
   }
 
+  const { credentials: plaintextCredentials, ...restUpdate } = parsed.data;
   const [product] = await db
     .update(productsTable)
-    .set(parsed.data)
+    .set({
+      ...restUpdate,
+      ...(plaintextCredentials !== undefined
+        ? { credentials: plaintextCredentials ? encryptCredentials(plaintextCredentials) : null }
+        : {}),
+    })
     .where(eq(productsTable.id, params.data.id))
     .returning();
 
@@ -190,6 +211,8 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
 
   res.json(UpdateProductResponse.parse({
     ...product,
+    hasCredentials: product.credentials !== null,
+    credentials: null,
     vendorName: vendor?.name ?? "",
     vendorAvatar: vendor?.avatar ?? null,
     categoryName: category?.name ?? "",
