@@ -471,9 +471,11 @@ export default function Dashboard() {
       },
       {
         onSuccess: () => setPayoutSaved(true),
-        onError: () =>
+        onError: (err: any) =>
           setPayoutError(
-            "We couldn't save your payout details. Please try again.",
+            err?.message
+              ? `We couldn't save your payout details: ${err.message}`
+              : "We couldn't save your payout details. Please try again.",
           ),
       },
     );
