@@ -174,6 +174,7 @@ export default function Dashboard() {
     email: "",
   });
   const [payoutSaved, setPayoutSaved] = useState(false);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
 
   const [upgradingTier, setUpgradingTier] = useState<"pro" | "premium" | null>(
     null,
@@ -451,6 +452,33 @@ export default function Dashboard() {
       queryKey: getListVendorSessionSlotsQueryKey(vendorId),
     });
 
+  const handleSavePayoutSettings = () => {
+    setPayoutError(null);
+    setPayoutSaved(false);
+    if (!vendorId || !payoutForm.momoNumber) {
+      setPayoutError("A mobile money number is required.");
+      return;
+    }
+
+    updatePayoutSettings.mutate(
+      {
+        vendorId,
+        data: {
+          momoNumber: payoutForm.momoNumber,
+          momoNetwork: payoutForm.momoNetwork,
+          email: payoutForm.email || undefined,
+        },
+      },
+      {
+        onSuccess: () => setPayoutSaved(true),
+        onError: () =>
+          setPayoutError(
+            "We couldn't save your payout details. Please try again.",
+          ),
+      },
+    );
+  };
+
   const handleRespond = (reviewId: number) => {
     if (!responseText.trim()) return;
     respondToReview.mutate(
@@ -650,6 +678,7 @@ export default function Dashboard() {
           </TabsTrigger>
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="payout">Payout</TabsTrigger>
         </TabsList>
 
         <TabsContent value="courses">
@@ -1863,6 +1892,97 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+        </TabsContent>
+
+        <TabsContent value="payout">
+          <Card className="max-w-md">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-1">
+                <Smartphone className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Payout details</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Sales are held securely until the buyer confirms delivery (or
+                automatically after 14 days). Once released, your share pays
+                out straight to this mobile money number.
+              </p>
+
+              {payoutError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 mb-3">
+                  {payoutError}
+                </div>
+              )}
+              {payoutSaved && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm text-primary mb-3 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" /> Payout details saved.
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    Mobile Money Number
+                  </label>
+                  <input
+                    placeholder="e.g. 0244000000"
+                    value={payoutForm.momoNumber}
+                    onChange={(e) =>
+                      setPayoutForm({
+                        ...payoutForm,
+                        momoNumber: e.target.value,
+                      })
+                    }
+                    className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    Network
+                  </label>
+                  <Select
+                    value={payoutForm.momoNetwork}
+                    onValueChange={(v) =>
+                      setPayoutForm({
+                        ...payoutForm,
+                        momoNetwork: v as "MTN" | "Vodafone" | "AirtelTigo",
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MTN">MTN</SelectItem>
+                      <SelectItem value="Vodafone">Vodafone</SelectItem>
+                      <SelectItem value="AirtelTigo">AirtelTigo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    Payout Email (optional)
+                  </label>
+                  <input
+                    placeholder="Where Paystack can reach you about transfers"
+                    value={payoutForm.email}
+                    onChange={(e) =>
+                      setPayoutForm({ ...payoutForm, email: e.target.value })
+                    }
+                    className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <Button
+                  onClick={handleSavePayoutSettings}
+                  disabled={updatePayoutSettings.isPending}
+                  className="w-full"
+                >
+                  {updatePayoutSettings.isPending
+                    ? "Saving..."
+                    : "Save Payout Details"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
