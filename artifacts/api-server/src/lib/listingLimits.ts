@@ -2,7 +2,7 @@ import { db, coursesTable, productsTable, sessionSlotsTable } from "@workspace/d
 import { and, eq, gte, sql } from "drizzle-orm";
 
 export function listingLimitForPlan(plan: string | null | undefined): number {
-  return plan === "premium" ? Infinity : plan === "pro" ? 10 : 1;
+  return plan === "premium" ? Infinity : plan === "pro" ? 10 : 3;
 }
 
 /**
