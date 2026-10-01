@@ -97,13 +97,22 @@ export default function Dashboard() {
   });
 
   const { data: analytics } = useGetVendorAnalytics(vendorId ?? 0, {
-    query: { enabled: !!vendorId, queryKey: getGetVendorAnalyticsQueryKey(vendorId ?? 0) },
+    query: {
+      enabled: !!vendorId,
+      queryKey: getGetVendorAnalyticsQueryKey(vendorId ?? 0),
+    },
   });
   const { data: slots } = useListVendorSessionSlots(vendorId ?? 0, {
-    query: { enabled: !!vendorId, queryKey: getListVendorSessionSlotsQueryKey(vendorId ?? 0) },
+    query: {
+      enabled: !!vendorId,
+      queryKey: getListVendorSessionSlotsQueryKey(vendorId ?? 0),
+    },
   });
   const { data: allReviews } = useListAllVendorReviews(vendorId ?? 0, {
-    query: { enabled: !!vendorId, queryKey: getListAllVendorReviewsQueryKey(vendorId ?? 0) },
+    query: {
+      enabled: !!vendorId,
+      queryKey: getListAllVendorReviewsQueryKey(vendorId ?? 0),
+    },
   });
 
   const createSlot = useCreateSessionSlot();
@@ -147,7 +156,9 @@ export default function Dashboard() {
     licenseTerms: "",
     credentials: "",
   });
-  const [productPreviewFile, setProductPreviewFile] = useState<File | null>(null);
+  const [productPreviewFile, setProductPreviewFile] = useState<File | null>(
+    null,
+  );
 
   const [slotForm, setSlotForm] = useState({
     title: "",
@@ -334,7 +345,9 @@ export default function Dashboard() {
       if (productPreviewFile) previewUrl = await uploadFile(productPreviewFile);
     } catch {
       setUploadingProduct(false);
-      setProductError("We couldn't upload one of those files. Please try again.");
+      setProductError(
+        "We couldn't upload one of those files. Please try again.",
+      );
       return;
     }
     setUploadingProduct(false);
@@ -571,7 +584,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm text-muted-foreground">
                 {vendor.plan === "free"
-                  ? "You're on the Free plan — up to 1 listing. Upgrade for more listings, analytics, and priority placement."
+                  ? "You're on the Free plan — up to 3 listing. Upgrade for more listings, analytics, and priority placement."
                   : "You're on the Pro plan. Go Premium for unlimited listings, the verified badge, and featured homepage placement."}
               </p>
             </div>
@@ -856,10 +869,20 @@ export default function Dashboard() {
                         className="h-auto p-0 text-xs text-destructive"
                         disabled={deleteCourse.isPending}
                         onClick={() => {
-                          if (!window.confirm(`Delete "${course.title}"? This can't be undone and will also remove its reviews.`)) return;
+                          if (
+                            !window.confirm(
+                              `Delete "${course.title}"? This can't be undone and will also remove its reviews.`,
+                            )
+                          )
+                            return;
                           deleteCourse.mutate(
                             { id: course.id },
-                            { onSuccess: () => queryClient.invalidateQueries({ queryKey: getListCoursesQueryKey() }) },
+                            {
+                              onSuccess: () =>
+                                queryClient.invalidateQueries({
+                                  queryKey: getListCoursesQueryKey(),
+                                }),
+                            },
                           );
                         }}
                       >
@@ -1110,8 +1133,8 @@ export default function Dashboard() {
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Encrypted and only revealed to the buyer after payment —
-                      use this for game accounts and similar listings instead
-                      of putting credentials in the uploaded file.
+                      use this for game accounts and similar listings instead of
+                      putting credentials in the uploaded file.
                     </p>
                   </div>
 
@@ -1205,10 +1228,20 @@ export default function Dashboard() {
                       className="h-auto p-0 text-xs text-destructive mt-1"
                       disabled={deleteProduct.isPending}
                       onClick={() => {
-                        if (!window.confirm(`Delete "${product.title}"? This can't be undone and will also remove its reviews.`)) return;
+                        if (
+                          !window.confirm(
+                            `Delete "${product.title}"? This can't be undone and will also remove its reviews.`,
+                          )
+                        )
+                          return;
                         deleteProduct.mutate(
                           { id: product.id },
-                          { onSuccess: () => queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() }) },
+                          {
+                            onSuccess: () =>
+                              queryClient.invalidateQueries({
+                                queryKey: getListProductsQueryKey(),
+                              }),
+                          },
                         );
                       }}
                     >
@@ -1623,277 +1656,279 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="analytics">
-        <div className="theme-refero-ui rounded-3xl p-6">
-          {/* Lifetime totals — shown on every plan. */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Your revenue (lifetime)
-                </p>
-                <p className="text-2xl font-bold font-display">
-                  GHS {(analytics?.summary.totalRevenue ?? 0).toFixed(2)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground mb-1">Units sold</p>
-                <p className="text-2xl font-bold font-display">
-                  {analytics?.summary.unitsSold ?? 0}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground mb-1">Orders</p>
-                <p className="text-2xl font-bold font-display">
-                  {analytics?.summary.orderCount ?? 0}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Free plan: locked state with a clear upsell rather than silently
-              showing paid features to everyone. */}
-          {analytics?.locked ? (
-            <Card className="mb-8">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mx-auto mb-3">
-                  <Lock className="h-6 w-6 text-foreground" />
-                </div>
-                <h3 className="font-semibold mb-2">
-                  Sales analytics are a Pro feature
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-                  {analytics.upgradeMessage}
-                </p>
-                <Button
-                  disabled={subscribeVendor.isPending}
-                  onClick={() => handleUpgrade("pro")}
-                >
-                  Upgrade to Pro — GHS 80/mo
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-4">
-                  Revenue — last 12 months
-                </h2>
-                {analytics?.revenueTrend?.length ? (
-                  <Card>
-                    <CardContent className="p-5">
-                      <div className="space-y-3">
-                        {analytics.revenueTrend.map((point: any) => {
-                          const peak = Math.max(
-                            ...analytics.revenueTrend.map(
-                              (p: any) => p.revenue,
-                            ),
-                            1,
-                          );
-                          return (
-                            <div key={point.month}>
-                              <div className="flex items-center justify-between text-sm mb-1">
-                                <span className="text-muted-foreground">
-                                  {new Date(
-                                    `${point.month}-01`,
-                                  ).toLocaleDateString("en-GH", {
-                                    month: "short",
-                                    year: "numeric",
-                                  })}
-                                </span>
-                                <span className="font-medium">
-                                  GHS {point.revenue.toFixed(2)}
-                                  <span className="text-muted-foreground text-xs ml-2">
-                                    {point.units} sold
-                                  </span>
-                                </span>
-                              </div>
-                              <div className="w-full bg-muted rounded-full h-2">
-                                <div
-                                  className="bg-primary rounded-full h-2 transition-all"
-                                  style={{
-                                    width: `${(point.revenue / peak) * 100}%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No sales yet — your revenue trend will appear here.
+          <div className="theme-refero-ui rounded-3xl p-6">
+            {/* Lifetime totals — shown on every plan. */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Your revenue (lifetime)
                   </p>
-                )}
-              </div>
+                  <p className="text-2xl font-bold font-display">
+                    GHS {(analytics?.summary.totalRevenue ?? 0).toFixed(2)}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Units sold
+                  </p>
+                  <p className="text-2xl font-bold font-display">
+                    {analytics?.summary.unitsSold ?? 0}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Orders</p>
+                  <p className="text-2xl font-bold font-display">
+                    {analytics?.summary.orderCount ?? 0}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-4">
-                  Best-selling listings
-                </h2>
-                {analytics?.topListings?.length ? (
-                  <div className="space-y-2">
-                    {analytics.topListings.map((listing: any, i: number) => (
-                      <Card key={`${listing.title}-${i}`}>
-                        <CardContent className="p-4 flex items-center gap-4">
-                          <span className="text-sm font-bold text-muted-foreground w-6 flex-shrink-0">
-                            {i + 1}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">
-                              {listing.title}
+            {/* Free plan: locked state with a clear upsell rather than silently
+              showing paid features to everyone. */}
+            {analytics?.locked ? (
+              <Card className="mb-8">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mx-auto mb-3">
+                    <Lock className="h-6 w-6 text-foreground" />
+                  </div>
+                  <h3 className="font-semibold mb-2">
+                    Sales analytics are a Pro feature
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+                    {analytics.upgradeMessage}
+                  </p>
+                  <Button
+                    disabled={subscribeVendor.isPending}
+                    onClick={() => handleUpgrade("pro")}
+                  >
+                    Upgrade to Pro — GHS 80/mo
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold mb-4">
+                    Revenue — last 12 months
+                  </h2>
+                  {analytics?.revenueTrend?.length ? (
+                    <Card>
+                      <CardContent className="p-5">
+                        <div className="space-y-3">
+                          {analytics.revenueTrend.map((point: any) => {
+                            const peak = Math.max(
+                              ...analytics.revenueTrend.map(
+                                (p: any) => p.revenue,
+                              ),
+                              1,
+                            );
+                            return (
+                              <div key={point.month}>
+                                <div className="flex items-center justify-between text-sm mb-1">
+                                  <span className="text-muted-foreground">
+                                    {new Date(
+                                      `${point.month}-01`,
+                                    ).toLocaleDateString("en-GH", {
+                                      month: "short",
+                                      year: "numeric",
+                                    })}
+                                  </span>
+                                  <span className="font-medium">
+                                    GHS {point.revenue.toFixed(2)}
+                                    <span className="text-muted-foreground text-xs ml-2">
+                                      {point.units} sold
+                                    </span>
+                                  </span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2">
+                                  <div
+                                    className="bg-primary rounded-full h-2 transition-all"
+                                    style={{
+                                      width: `${(point.revenue / peak) * 100}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No sales yet — your revenue trend will appear here.
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold mb-4">
+                    Best-selling listings
+                  </h2>
+                  {analytics?.topListings?.length ? (
+                    <div className="space-y-2">
+                      {analytics.topListings.map((listing: any, i: number) => (
+                        <Card key={`${listing.title}-${i}`}>
+                          <CardContent className="p-4 flex items-center gap-4">
+                            <span className="text-sm font-bold text-muted-foreground w-6 flex-shrink-0">
+                              {i + 1}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm">
+                                {listing.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {listing.itemType} · {listing.units} sold
+                              </p>
+                            </div>
+                            <p className="font-bold text-primary font-display text-sm flex-shrink-0">
+                              GHS {listing.revenue.toFixed(2)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {listing.itemType} · {listing.units} sold
-                            </p>
-                          </div>
-                          <p className="font-bold text-primary font-display text-sm flex-shrink-0">
-                            GHS {listing.revenue.toFixed(2)}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Nothing sold yet.
+                    </p>
+                  )}
+                </div>
+
+                {analytics?.advanced ? (
+                  <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="text-lg font-semibold">
+                        Advanced analytics
+                      </h2>
+                      <Badge>Premium</Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <Card>
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Repeat buyer rate
+                          </p>
+                          <p className="text-2xl font-bold font-display">
+                            {analytics.advanced.repeatBuyerRate}%
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {analytics.advanced.repeatBuyers} of{" "}
+                            {analytics.advanced.uniqueBuyers} buyers
                           </p>
                         </CardContent>
                       </Card>
-                    ))}
+                      <Card>
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Average order value
+                          </p>
+                          <p className="text-2xl font-bold font-display">
+                            GHS{" "}
+                            {analytics.advanced.averageOrderValue.toFixed(2)}
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Held in escrow
+                          </p>
+                          <p className="text-2xl font-bold font-display">
+                            GHS{" "}
+                            {analytics.advanced.fundsHeldInEscrow.toFixed(2)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Awaiting buyer confirmation
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Your payout share
+                          </p>
+                          <p className="text-2xl font-bold font-display">
+                            {analytics.advanced.payoutPercentage}%
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Nothing sold yet.
-                  </p>
-                )}
-              </div>
-
-              {analytics?.advanced ? (
-                <div className="mb-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-lg font-semibold">
-                      Advanced analytics
-                    </h2>
-                    <Badge>Premium</Badge>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card>
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Repeat buyer rate
-                        </p>
-                        <p className="text-2xl font-bold font-display">
-                          {analytics.advanced.repeatBuyerRate}%
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {analytics.advanced.repeatBuyers} of{" "}
-                          {analytics.advanced.uniqueBuyers} buyers
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Average order value
-                        </p>
-                        <p className="text-2xl font-bold font-display">
-                          GHS{" "}
-                          {analytics.advanced.averageOrderValue.toFixed(2)}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Held in escrow
-                        </p>
-                        <p className="text-2xl font-bold font-display">
-                          GHS{" "}
-                          {analytics.advanced.fundsHeldInEscrow.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Awaiting buyer confirmation
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Your payout share
-                        </p>
-                        <p className="text-2xl font-bold font-display">
-                          {analytics.advanced.payoutPercentage}%
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              ) : (
-                <Card className="mb-8">
-                  <CardContent className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Lock className="h-4 w-4 text-foreground" />
-                        <p className="font-medium text-sm">
-                          Advanced analytics
+                  <Card className="mb-8">
+                    <CardContent className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Lock className="h-4 w-4 text-foreground" />
+                          <p className="font-medium text-sm">
+                            Advanced analytics
+                          </p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {analytics?.upgradeMessage}
                         </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {analytics?.upgradeMessage}
-                      </p>
+                      <Button
+                        className="flex-shrink-0"
+                        disabled={subscribeVendor.isPending}
+                        onClick={() => handleUpgrade("premium")}
+                      >
+                        Go Premium — GHS 200/mo
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+
+            <h2 className="text-lg font-semibold mb-4">
+              Marketplace category breakdown
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {breakdown?.map((cat) => (
+                <Card key={cat.categoryId}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-sm">
+                        {cat.categoryName}
+                      </h3>
+                      <Badge variant="secondary">{cat.totalItems} items</Badge>
                     </div>
-                    <Button
-                      className="flex-shrink-0"
-                      disabled={subscribeVendor.isPending}
-                      onClick={() => handleUpgrade("premium")}
-                    >
-                      Go Premium — GHS 200/mo
-                    </Button>
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <span>{cat.courseCount} courses</span>
+                      <span>{cat.productCount} products</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2 mt-3">
+                      <div
+                        className="bg-primary rounded-full h-2 transition-all"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (cat.totalItems /
+                              Math.max(
+                                1,
+                                breakdown.reduce(
+                                  (max, c) => Math.max(max, c.totalItems),
+                                  1,
+                                ),
+                              )) *
+                              100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
-              )}
-            </>
-          )}
-
-          <h2 className="text-lg font-semibold mb-4">
-            Marketplace category breakdown
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {breakdown?.map((cat) => (
-              <Card key={cat.categoryId}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-sm">
-                      {cat.categoryName}
-                    </h3>
-                    <Badge variant="secondary">{cat.totalItems} items</Badge>
-                  </div>
-                  <div className="flex gap-4 text-sm text-muted-foreground">
-                    <span>{cat.courseCount} courses</span>
-                    <span>{cat.productCount} products</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 mt-3">
-                    <div
-                      className="bg-primary rounded-full h-2 transition-all"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (cat.totalItems /
-                            Math.max(
-                              1,
-                              breakdown.reduce(
-                                (max, c) => Math.max(max, c.totalItems),
-                                1,
-                              ),
-                            )) *
-                            100,
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
         </TabsContent>
 
         <TabsContent value="payout">
@@ -1905,8 +1940,8 @@ export default function Dashboard() {
               </div>
               <p className="text-sm text-muted-foreground mb-4">
                 Sales are held securely until the buyer confirms delivery (or
-                automatically after 14 days). Once released, your share pays
-                out straight to this mobile money number.
+                automatically after 14 days). Once released, your share pays out
+                straight to this mobile money number.
               </p>
 
               {payoutError && (
